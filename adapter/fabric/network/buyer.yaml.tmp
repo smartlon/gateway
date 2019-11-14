@@ -1,0 +1,81 @@
+version: '2'
+
+networks:
+  logistics:
+
+volumes:
+  buyer.ca.com:
+  peer0.buyer.com:
+  peer1.buyer.com:
+
+services:
+  buyer.ca.com:
+    container_name: buyer.ca.com 
+    extends:
+      file: org-abstract.yaml
+      service: ca-abstract
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_CA_NAME=buyer-ca-server
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.buyer.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA_buyer_KEY
+    ports:
+      - "9054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.buyer.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/CA_buyer_KEY -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/buyer.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    networks:
+      - logistics
+
+  peer0.buyer.com:
+    container_name: peer0.buyer.com
+    extends:
+      file: org-abstract.yaml
+      service: peer-abstract
+    environment:
+      - CORE_PEER_ID=peer0.buyer.com
+      - CORE_PEER_ADDRESS=peer0.buyer.com:11051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.buyer.com:11052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
+      #- CORE_PEER_GOSSIP_BOOTSTRAP=peer1.buyer.com:12051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.buyer.com:11051
+      - CORE_PEER_LOCALMSPID=buyerMSP
+
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/buyer.com/peers/peer0.buyer.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/buyer.com/peers/peer0.buyer.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.buyer.com:/var/hyperledger/production
+    ports:
+      - 11051:11051
+      - 11052:11052
+    networks:
+      - logistics
+
+  peer1.buyer.com:
+    container_name: peer1.buyer.com
+    extends:
+      file: org-abstract.yaml
+      service: peer-abstract
+    environment:
+      - CORE_PEER_ID=peer1.buyer.com
+      - CORE_PEER_ADDRESS=peer1.buyer.com:12051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:12051
+      - CORE_PEER_CHAINCODEADDRESS=peer1.buyer.com:12052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:12052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.buyer.com:12051
+      #- CORE_PEER_GOSSIP_BOOTSTRAP=peer0.buyer.com:11051
+      - CORE_PEER_LOCALMSPID=buyerMSP
+
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/buyer.com/peers/peer1.buyer.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/buyer.com/peers/peer1.buyer.com/tls:/etc/hyperledger/fabric/tls
+        - peer1.buyer.com:/var/hyperledger/production
+    ports:
+      - 12051:12051
+      - 12052:12052
+    networks:
+      - logistics

@@ -1,0 +1,172 @@
+Organizations:
+    - &OrdererOrg
+        Name: OrdererOrg
+        ID: OrdererMSP
+        MSPDir: crypto-config/ordererOrganizations/logisticstransfer.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('OrdererMSP.admin')"
+
+    - &Org1
+        Name: sellerMSP
+        ID: sellerMSP
+        MSPDir: crypto-config/peerOrganizations/seller.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('sellerMSP.admin', 'sellerMSP.peer', 'sellerMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('sellerMSP.admin', 'sellerMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('sellerMSP.admin')"
+
+        AnchorPeers:
+            - Host: peer0.seller.com
+              Port: 7051
+
+    - &Org2
+        Name: logisMSP
+        ID: logisMSP
+        MSPDir: crypto-config/peerOrganizations/logis.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('sellerMSP.admin', 'sellerMSP.peer', 'sellerMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('sellerMSP.admin', 'sellerMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('sellerMSP.admin')"
+
+        AnchorPeers:
+            - Host: peer0.logis.com
+              Port: 9051
+    - &Org3
+        Name: buyerMSP
+        ID: buyerMSP
+        MSPDir: crypto-config/peerOrganizations/buyer.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('sellerMSP.admin', 'sellerMSP.peer', 'sellerMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('sellerMSP.admin', 'sellerMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('sellerMSP.admin')"
+
+        AnchorPeers:
+            - Host: peer0.buyer.com
+              Port: 11051
+
+Capabilities:
+    Channel: &ChannelCapabilities
+        V1_4_3: true
+        V1_3: false
+        V1_1: false
+    Orderer: &OrdererCapabilities
+        V1_4_2: true
+        V1_1: false
+    Application: &ApplicationCapabilities
+        V1_4_2: true
+        V1_3: false
+        V1_2: false
+        V1_1: false
+
+Application: &ApplicationDefaults
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+    OrdererType: solo
+
+    Addresses:
+        - orderer.logisticstransfer.com:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+#   CHANNEL
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ChannelCapabilities
+#   Profile
+Profiles:
+
+    ThreeOrgsOrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            logisticsConsortium:
+                Organizations:
+                    - *Org1
+                    - *Org2
+                    - *Org3
+    ThreeOrgsChannel:
+        Consortium: logisticsConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1
+                - *Org2
+                - *Org3
+            Capabilities:
+                <<: *ApplicationCapabilities
+
+  

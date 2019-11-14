@@ -1,0 +1,82 @@
+version: '2'
+
+networks:
+  logistics:
+
+volumes:
+  logis.ca.com:
+
+  peer0.logis.com:
+  peer1.logis.com:
+
+services:
+  logis.ca.com:
+    container_name: logis.ca.com 
+    extends:
+      file: org-abstract.yaml
+      service: ca-abstract
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_CA_NAME=logis-ca-server
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.logis.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA_logis_KEY
+    ports:
+      - "8054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.logis.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/CA_logis_KEY -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/logis.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    networks:
+      - logistics
+
+  peer0.logis.com:
+    container_name: peer0.logis.com
+    extends:
+      file: org-abstract.yaml
+      service: peer-abstract
+    environment:
+      - CORE_PEER_ID=peer0.logis.com
+      - CORE_PEER_ADDRESS=peer0.logis.com:9051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.logis.com:9052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
+      #- CORE_PEER_GOSSIP_BOOTSTRAP=peer1.logis.com:10051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.logis.com:9051
+      - CORE_PEER_LOCALMSPID=logisMSP
+
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/logis.com/peers/peer0.logis.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/logis.com/peers/peer0.logis.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.logis.com:/var/hyperledger/production
+    ports:
+      - 9051:9051
+      - 9052:9052
+    networks:
+      - logistics
+
+  peer1.logis.com:
+    container_name: peer1.logis.com
+    extends:
+      file: org-abstract.yaml
+      service: peer-abstract
+    environment:
+      - CORE_PEER_ID=peer1.logis.com
+      - CORE_PEER_ADDRESS=peer1.logis.com:10051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:10051
+      - CORE_PEER_CHAINCODEADDRESS=peer1.logis.com:10052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:10052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.logis.com:10051
+      #- CORE_PEER_GOSSIP_BOOTSTRAP=peer0.logis.com:9051
+      - CORE_PEER_LOCALMSPID=logisMSP
+
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/logis.com/peers/peer1.logis.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/logis.com/peers/peer1.logis.com/tls:/etc/hyperledger/fabric/tls
+        - peer1.logis.com:/var/hyperledger/production
+    ports:
+      - 10051:10051
+      - 10052:10052
+    networks:
+      - logistics

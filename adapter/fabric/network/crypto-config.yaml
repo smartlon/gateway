@@ -1,0 +1,31 @@
+version: '2'
+
+OrdererOrgs:
+  - Name: Orderer 
+    Domain: logisticstransfer.com
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: seller 
+    Domain: seller.com 
+    EnableNodeOUs: true
+    Template: 
+      Count: 2
+    Users:
+      Count: 1
+  - Name: logis 
+    Domain: logis.com 
+    EnableNodeOUs: true
+    Template: 
+      Count: 2
+    Users:
+      Count: 1
+  - Name: buyer 
+    Domain: buyer.com 
+    EnableNodeOUs: true
+    Template: 
+      Count: 2
+    Users:
+      Count: 1
+  
