@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"./fabric/sdk"
+	"github.com/smartlon/gateway/adapter/fabric/sdk"
 	"github.com/astaxie/beego"
-	_ "./rooter"
+	_ "github.com/smartlon/gateway/adapter/rooter"
 )
 
 type Action struct {

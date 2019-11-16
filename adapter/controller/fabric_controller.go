@@ -1,14 +1,15 @@
 package controller
 
 import (
-	"../fabric/sdk"
+	"github.com/smartlon/gateway/adapter/fabric/sdk"
 	"encoding/json"
 	"fmt"
-	"../log"
+	"github.com/smartlon/gateway/adapter/log"
 )
 
 const (
-	CHAINCODEID = "log"
+	CHAINCODEID = "logistic"
+
 )
 
 type UserReq struct {

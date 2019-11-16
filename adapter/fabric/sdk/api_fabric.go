@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"../../log"
+	"github.com/smartlon/gateway/adapter/log"
 	"github.com/pkg/errors"
 
 )

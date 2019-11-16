@@ -1,8 +1,8 @@
 package sdk
 
 import (
-	"./utils"
-	"../../log"
+	"github.com/smartlon/gateway/adapter/fabric/sdk/utils"
+	"github.com/smartlon/gateway/adapter/log"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/pkg/errors"

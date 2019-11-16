@@ -2,8 +2,8 @@ package sdk
 
 import (
 	"time"
-	"./utils"
-	"../../log"
+	"github.com/smartlon/gateway/adapter/fabric/sdk/utils"
+	"github.com/smartlon/gateway/adapter/log"
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/channel"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	pb "github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/protos/peer"

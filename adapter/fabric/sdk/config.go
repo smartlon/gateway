@@ -43,7 +43,7 @@ type FabConfig struct {
 var once *sync.Once
 var config *FabConfig
 
-var peerURL = ""
+var peerURL = "localhost:7051,localhost:9051"
 var orgIDsStr = ""
 
 func init() {
@@ -53,8 +53,8 @@ func init() {
 func Config() *FabConfig {
 	once.Do(func() {
 		config = &FabConfig{
-			ConfigFile:         "D:\\go\\src\\github.com\\smartlon\\gateway\\adapter\\fabric\\network\\fixtures\\config\\config_windows.yaml",
-			UserName:           "admin",
+			ConfigFile:         "/home/lgao/go/src/github.com/smartlon/gateway/adapter/fabric/network/fixtures/config/config_test.yaml",
+			UserName:           "",
 			ChainID:            "logistics.fabric",
 			ChannelID:          "logchannel",
 			SelectionProvider:  AutoDetectSelectionProvider,

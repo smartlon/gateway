@@ -7,7 +7,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/iotaledger/iota.go/consts"
 	"github.com/iotaledger/iota.go/mam/v1"
-	. "../iota/sdk"
+	. "github.com/smartlon/gateway/adapter/iota/sdk"
 	"sync"
 )
 

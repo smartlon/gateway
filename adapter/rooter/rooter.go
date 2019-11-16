@@ -2,7 +2,7 @@ package rooter
 
 import (
 	"github.com/astaxie/beego"
-	controller "../controller"
+	controller "github.com/smartlon/gateway/adapter/controller"
 	)
 
 func init() {
