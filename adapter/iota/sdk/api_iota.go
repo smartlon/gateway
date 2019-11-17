@@ -10,31 +10,36 @@ import (
 	"sync"
 )
 
-type IotaClient struct {
+type MAMClient struct {
 	Api *mam.API
 	Receiver *mam.Receiver
 	Transmitter *mam.Transmitter
 }
 
-var iotaClient IotaClient
+var mamClient MAMClient
+var iotaApi *api.API
 var once *sync.Once
 
 func init(){
-	account, iotaApi,err := NewAccount()
+	account, iotaMAMApi,err := NewAccount()
 	if err != nil {
 		log.Fatal(err)
 	}
 	account.Start()
 	defer account.Shutdown()
-	receiver := mam.NewReceiver(iotaApi)
-	transmitter := mam.NewTransmitter(iotaApi,GetInMemorySeed(SEED),MWM,consts.SecurityLevelMedium)
+	receiver := mam.NewReceiver(iotaMAMApi)
+	transmitter := mam.NewTransmitter(iotaMAMApi,GetInMemorySeed(SEED),MWM,consts.SecurityLevelMedium)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	once = &sync.Once{}
 	once.Do(func() {
-		iotaClient = IotaClient{
-			&iotaApi,
+		iotaApi,err = NewConnection()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		mamClient = MAMClient{
+			&iotaMAMApi,
 			receiver,
 			transmitter,
 		}
@@ -56,12 +61,12 @@ func MAMTransmit(message, sideKey string) (string, error){
 }
 
 func mamSend( message, sideKey string) (string, error ){
-	err :=  iotaClient.Transmitter.SetMode(mam.ChannelModeRestricted,sideKey)
+	err :=  mamClient.Transmitter.SetMode(mam.ChannelModeRestricted,sideKey)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
 	}
-	root, err := iotaClient.Transmitter.Transmit(message)
+	root, err := mamClient.Transmitter.Transmit(message)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
@@ -70,7 +75,7 @@ func mamSend( message, sideKey string) (string, error ){
 }
 
 func  MAMReceive(sideKey, root string) ([]string, error ){
-	err := iotaClient.Receiver.SetMode(mam.ChannelModeRestricted,sideKey)
+	err := mamClient.Receiver.SetMode(mam.ChannelModeRestricted,sideKey)
 	if err != nil {
 		fmt.Println(err.Error())
 		return []string{},err
@@ -78,7 +83,7 @@ func  MAMReceive(sideKey, root string) ([]string, error ){
 	messages := make([]string,0)
 	message := make([]string,0)
 	for root != "" {
-		root,message, err = iotaClient.Receiver.Receive(root)
+		root,message, err = mamClient.Receiver.Receive(root)
 		if err != nil {
 			fmt.Println(err.Error())
 			return []string{},err
@@ -92,7 +97,7 @@ func  MAMReceive(sideKey, root string) ([]string, error ){
 
 
 func NodeInfo() ([]byte, error) {
-	nodeInfo, err := iotaClient.Api.GetNodeInfo()
+	nodeInfo, err := iotaApi.GetNodeInfo()
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil,err
