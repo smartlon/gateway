@@ -101,7 +101,7 @@ func  listener(action *chaincodeInvokeAction,chaincode string,wg *sync.WaitGroup
 		if err !=nil {
 			fmt.Printf("fabric  failed to callback for SignLogistics :  %v\n", err.Error())
 		}
-	case <-time.After(time.Second * 10):
+	case <-time.After(time.Second * 3):
 		fmt.Println("Exit while waiting for chaincode event")
 		}
 	return nil
