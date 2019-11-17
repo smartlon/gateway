@@ -12,6 +12,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/pkg/errors"
 	"github.com/smartlon/gateway/adapter/iota/sdk"
+	"sync"
 	"time"
 )
 
@@ -39,8 +40,8 @@ type logisticstrans struct {
 	MAMChannel    mamchannel `json:"MAMChannel"`
 }
 
-func  listener(action *chaincodeInvokeAction,chaincode string) error {
-
+func  listener(action *chaincodeInvokeAction,chaincode string,wg *sync.WaitGroup) error {
+	defer 	wg.Done()
 	ec, err := action.EventClient(event.WithBlockEvents())
 	if err != nil {
 		fmt.Println("failed to create client")
@@ -104,8 +105,6 @@ func  listener(action *chaincodeInvokeAction,chaincode string) error {
 		fmt.Println("Exit while waiting for chaincode event")
 		}
 	return nil
-
-
 }
 
 func unregister(ec *event.Client,registrations []fab.Registration) {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"github.com/smartlon/gateway/adapter/log"
 	"github.com/pkg/errors"
-
+	"sync"
 )
 
 func RegisterUser(username, pwd string) (
@@ -46,13 +46,16 @@ func ChaincodeInvoke(chaincodeID string, argsArray []Args) (
 		log.Errorf("Error while initializing invokeAction: %v", err)
 		return
 	}
-	go listener(action,chaincodeID)
+	var wg *sync.WaitGroup
+	wg.Add(1)
+	go listener(action,chaincodeID,wg)
 	defer action.Terminate()
 
 	result, err = action.invoke(Config().ChannelID, chaincodeID, argsArray)
 	if err != nil {
 		log.Errorf("Error while calling action.invoke(): %v", err)
 	}
+	wg.Wait()
 	return
 }
 
