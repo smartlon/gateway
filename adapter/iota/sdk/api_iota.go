@@ -11,7 +11,7 @@ import (
 )
 
 type IotaClient struct {
-	Api *api.API
+	Api *mam.API
 	Receiver *mam.Receiver
 	Transmitter *mam.Transmitter
 }

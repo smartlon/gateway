@@ -8,6 +8,7 @@ import (
 	"github.com/iotaledger/iota.go/account/store/badger"
 	"github.com/iotaledger/iota.go/account/timesrc"
 	"github.com/iotaledger/iota.go/api"
+	"github.com/iotaledger/iota.go/mam/v1"
 	"github.com/iotaledger/iota.go/pow"
 	"github.com/iotaledger/iota.go/trinary"
 	"log"
@@ -32,7 +33,7 @@ func GetNewAddress(seed string,iotaApi *api.API)(trinary.Hashes){
 	return addresses
 }
 
-func NewAccount() (account.Account, api.API, error) {
+func NewAccount() (account.Account, mam.API, error) {
 	_, proofOfWorkFunc := pow.GetFastestProofOfWorkImpl()
 	//endpoint := beego.AppConfig.String("endpoint")
 	iotaAPI, err := api.ComposeAPI(api.HTTPClientSettings{
@@ -40,17 +41,17 @@ func NewAccount() (account.Account, api.API, error) {
 		LocalProofOfWorkFunc: proofOfWorkFunc,
 	})
 	if err != nil {
-		return nil,api.API{}, err
+		return nil,nil, err
 	}
 	store, err := badger.NewBadgerStore("/home/lgao/go/src/github.com/smartlon/gateway/adapter/iota/db")
 	if err != nil {
-		return nil,api.API{}, err
+		return nil,nil, err
 	}
 	defer store.Close()
     em := event.NewEventMachine()
 	// create an accurate time source (in this case Google's NTP server).
 	timesource := timesrc.NewNTPTimeSource("time.google.com")
-	account, err = builder.NewBuilder().
+	account, err := builder.NewBuilder().
 		// Load the IOTA API to use
 		WithAPI(iotaAPI).
 		// Load the database onject to use
@@ -68,7 +69,7 @@ func NewAccount() (account.Account, api.API, error) {
 		// Load your custom plugin
 		Build( NewEventLoggerPlugin(em) )
 	if err != nil {
-		return nil,*iotaAPI, err
+		return nil,iotaAPI, err
 	}
-	return account,*iotaAPI,nil
+	return account,iotaAPI,nil
 }
