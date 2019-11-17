@@ -10,22 +10,12 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/pkg/errors"
+	"time"
 )
 
-type chaincodeListenAction struct {
-	Action
-	done       chan bool
-}
+func  listener(action *chaincodeInvokeAction,chaincode string) error {
 
-func newChaincodeListenAction() (*chaincodeListenAction, error) {
-	action := &chaincodeListenAction{done: make(chan bool)}
-	err := action.Initialize()
-	return action, err
-}
-
-func (a *chaincodeListenAction) Listener(chaincode string) error {
-
-	ec, err := a.EventClient(event.WithBlockEvents())
+	ec, err := action.EventClient(event.WithBlockEvents())
 	if err != nil {
 		fmt.Println("failed to create client")
 		return err
@@ -42,40 +32,33 @@ func (a *chaincodeListenAction) Listener(chaincode string) error {
 		fmt.Println("failed to register chaincode event: DeliveryLogistics")
 		return err
 	}
-	defer a.Unregister(ec,[]fab.Registration{registrationCreateChannel,registrationDeliveryLogistics})
-	exitLisener :=a.WaitForExit()
-	for {
-		select {
-		case ccEvent,ok := <-notifierCreateChannel:
-			if !ok {
-				return errors.WithMessage(err, "unexpected closed channel while waiting for chaincode event")
-			}
-			fmt.Printf("received chaincode event CreateChannel:  %v\n", ccEvent)
-		case ccEvent,ok := <-notifierDeliveryLogistics:
-			if !ok {
-				return errors.WithMessage(err, "unexpected closed channel while waiting for chaincode event")
-			}
-			fmt.Printf("received chaincode event DeliveryLogistics:  %v\n", ccEvent)
-		case _, _ = <-exitLisener:
-			fmt.Println("Exit while waiting for chaincode event")
-			return nil
+	defer  unregister(ec,[]fab.Registration{registrationCreateChannel,registrationDeliveryLogistics})
+	select {
+	case ccEvent,ok := <-notifierCreateChannel:
+		if !ok {
+			return errors.WithMessage(err, "unexpected closed channel while waiting for chaincode event")
 		}
-	}
+		fmt.Printf("received chaincode event CreateChannel:  %v\n", ccEvent)
+	case ccEvent,ok := <-notifierDeliveryLogistics:
+		if !ok {
+			return errors.WithMessage(err, "unexpected closed channel while waiting for chaincode event")
+		}
+		fmt.Printf("received chaincode event DeliveryLogistics:  %v\n", ccEvent)
+	case <-time.After(time.Second * 10):
+		fmt.Println("Exit while waiting for chaincode event")
+		}
+	return nil
+
 
 }
 
-func (a *chaincodeListenAction) Unregister(ec *event.Client,registrations []fab.Registration) {
+func unregister(ec *event.Client,registrations []fab.Registration) {
 	for _,registration := range registrations {
 		ec.Unregister(registration)
 	}
 }
 
 
-// WaitForEnter waits until the user presses Enter
-func (a *chaincodeListenAction) WaitForExit() chan bool {
-	a.done <- true
-	return a.done
-}
 
 
 

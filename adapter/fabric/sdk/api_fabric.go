@@ -32,30 +32,6 @@ func RegisterUser(username, pwd string) (
 	return
 }
 
-// ChaincodeListen listen chaincode
-func ChaincodeListen(chaincodeID string) (err error) {
-	log.Info("chaincode listen...")
-	if chaincodeID == "" {
-		err = fmt.Errorf("must specify the chaincode ID")
-		return
-	}
-	action, err := newChaincodeListenAction()
-	action.Set(Config().ChannelID,chaincodeID,[]Args{})
-	if err != nil {
-		log.Errorf("Error while initializing listenAction: %v", err)
-		return
-	}
-
-	defer action.Terminate()
-
-	err = action.Listener(chaincodeID)
-	if err != nil {
-		log.Errorf("Error while calling action.listen(): %v", err)
-	}
-	return
-}
-
-
 // ChaincodeInvoke invoke chaincode
 func ChaincodeInvoke(chaincodeID string, argsArray []Args) (
 	result string, err error) {
@@ -65,12 +41,12 @@ func ChaincodeInvoke(chaincodeID string, argsArray []Args) (
 		return
 	}
 	action, err := newChaincodeInvokeAction()
-        
+	action.Set(Config().ChannelID,chaincodeID,[]Args{})
 	if err != nil {
 		log.Errorf("Error while initializing invokeAction: %v", err)
 		return
 	}
-
+	go listener(action,chaincodeID)
 	defer action.Terminate()
 
 	result, err = action.invoke(Config().ChannelID, chaincodeID, argsArray)

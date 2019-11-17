@@ -12,10 +12,6 @@ const (
 
 )
 
-func init() {
-	go sdk.ChaincodeListen(CHAINCODEID)
-}
-
 type UserReq struct {
 	UserName string `json:"UserName"`
 	PassWord string `json:"PassWord"`
