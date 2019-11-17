@@ -19,7 +19,6 @@ type chaincodeInvokeAction struct {
 func newChaincodeInvokeAction() (*chaincodeInvokeAction, error) {
 	action := &chaincodeInvokeAction{done: make(chan bool)}
 	err := action.Initialize()
-	//listener(action)
 	return action, err
 }
 

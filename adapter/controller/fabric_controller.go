@@ -12,6 +12,13 @@ const (
 
 )
 
+func init() {
+	err := sdk.ChaincodeListen(CHAINCODEID)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}
+
 type UserReq struct {
 	UserName string `json:"UserName"`
 	PassWord string `json:"PassWord"`
