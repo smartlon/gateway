@@ -3,10 +3,11 @@ package sdk
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/iotaledger/iota.go/api"
 	"github.com/iotaledger/iota.go/consts"
 	"github.com/iotaledger/iota.go/mam/v1"
+	"log"
 	"sync"
-	"github.com/iotaledger/iota.go/api"
 )
 
 type IotaClient struct {
@@ -19,16 +20,21 @@ var iotaClient IotaClient
 var once *sync.Once
 
 func init(){
-	api,err := NewConnection()
-	receiver := mam.NewReceiver(api)
-	transmitter := mam.NewTransmitter(api,GetInMemorySeed(SEED),MWM,consts.SecurityLevelMedium)
+	account, iotaApi,err := NewAccount()
+	if err != nil {
+		log.Fatal(err)
+	}
+	account.Start()
+	defer account.Shutdown()
+	receiver := mam.NewReceiver(iotaApi)
+	transmitter := mam.NewTransmitter(iotaApi,GetInMemorySeed(SEED),MWM,consts.SecurityLevelMedium)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	once = &sync.Once{}
 	once.Do(func() {
 		iotaClient = IotaClient{
-			api,
+			iotaApi,
 			receiver,
 			transmitter,
 		}
@@ -36,20 +42,26 @@ func init(){
 
 }
 
-func  CreateMAM(message []byte){
-	//root, err := iotaClient.Transmitter.Transmit(message)
+func  CreateMAM(messageBytes []byte, sideKey string)(string, error){
+	message := string(messageBytes)
+	return mamSend(message,sideKey)
 }
-func  BlockMAM(message []byte){
-
+func  BlockMAM(messageBytes []byte, sideKey string)(string, error){
+	message := string(messageBytes)
+	return mamSend(message,sideKey)
 }
 
-func MAMTransmit(message string) (string, error){
-	root, err := iotaClient.Transmitter.Transmit(message)
-	err =  iotaClient.Transmitter.SetMode(mam.ChannelModeRestricted,SIDEKEYPRIVATE)
+func MAMTransmit(message, sideKey string) (string, error){
+	return mamSend(message,sideKey)
+}
+
+func mamSend( message, sideKey string) (string, error ){
+	err :=  iotaClient.Transmitter.SetMode(mam.ChannelModeRestricted,sideKey)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
 	}
+	root, err := iotaClient.Transmitter.Transmit(message)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
@@ -57,10 +69,11 @@ func MAMTransmit(message string) (string, error){
 	return root, nil
 }
 
-func  MAMReceive(sideKey, root string) []string {
+func  MAMReceive(sideKey, root string) ([]string, error ){
 	err := iotaClient.Receiver.SetMode(mam.ChannelModeRestricted,sideKey)
 	if err != nil {
 		fmt.Println(err.Error())
+		return []string{},err
 	}
 	messages := make([]string,0)
 	message := make([]string,0)
@@ -68,12 +81,13 @@ func  MAMReceive(sideKey, root string) []string {
 		root,message, err = iotaClient.Receiver.Receive(root)
 		if err != nil {
 			fmt.Println(err.Error())
+			return []string{},err
 		}
 		for _,str := range message {
 			messages = append(messages,str)
 		}
 	}
-	return messages
+	return messages,nil
 }
 
 

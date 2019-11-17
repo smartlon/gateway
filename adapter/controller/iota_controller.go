@@ -11,15 +11,13 @@ type LogisticsController struct {
 	beego.Controller
 }
 
-func (lc *LogisticsController) CreateMAM(){
-
-}
-func (lc *LogisticsController) BlockMAM(){
-
-}
-
 type MAMTransmitReq struct {
-	Message string `json:"message"`
+	Message string `json:"Message"`
+	SideKey string `json:"SideKey"`
+}
+type MAMReceiveReq struct {
+	Root string `json:"Root"`
+	SideKey string `json:"SideKey"`
 }
 
 func (lc *LogisticsController) MAMTransmit(){
@@ -29,17 +27,23 @@ func (lc *LogisticsController) MAMTransmit(){
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	message := mamReq.Message
-	root,err := MAMTransmit(message)
-	fmt.Println("root: "+ root)
-	lc.Data["json"] = map[string]interface{}{"root": root,"sidekey": SIDEKEYPRIVATE, "msg": err}
+	root,err := MAMTransmit(mamReq.Message,mamReq.SideKey)
+	var code,message,ret string
+	if err != nil {
+		code = "201"
+		message = "failed to transmit mam tx"
+		ret = err.Error()
+	}else {
+		code = "200"
+		message = "successed to transmit mam tx"
+		ret = root
+	}
+
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
 	lc.ServeJSON()
 
 }
-type MAMReceiveReq struct {
-	Root string `json:"root"`
-	SideKey string `json:"sidekey"`
-}
+
 
 func (lc *LogisticsController) MAMReceive(){
 	mamReqBytes := lc.Ctx.Input.RequestBody
@@ -48,11 +52,20 @@ func (lc *LogisticsController) MAMReceive(){
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(mamReq)
-	root := mamReq.Root
-	sideKey := mamReq.SideKey
-	messages := MAMReceive(sideKey,root)
-	lc.Data["json"] = map[string]interface{}{"mammessage": messages, "msg": err}
+	mamMessages,err := MAMReceive(mamReq.SideKey,mamReq.Root)
+	var code,message string
+	var ret []string
+	if err != nil {
+		code = "201"
+		message = "failed to receive mam tx"
+		ret = []string{err.Error()}
+	}else {
+		code = "200"
+		message = "successed to receive mam tx"
+		ret = mamMessages
+	}
+
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
 	lc.ServeJSON()
 }
 

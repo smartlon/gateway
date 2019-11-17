@@ -32,7 +32,7 @@ func GetNewAddress(seed string,iotaApi *api.API)(trinary.Hashes){
 	return addresses
 }
 
-func NewAccount() (account.Account, error) {
+func NewAccount() (account.Account, api.API, error) {
 	_, proofOfWorkFunc := pow.GetFastestProofOfWorkImpl()
 	//endpoint := beego.AppConfig.String("endpoint")
 	iotaAPI, err := api.ComposeAPI(api.HTTPClientSettings{
@@ -40,35 +40,35 @@ func NewAccount() (account.Account, error) {
 		LocalProofOfWorkFunc: proofOfWorkFunc,
 	})
 	if err != nil {
-
+		return nil,nil, err
 	}
 	store, err := badger.NewBadgerStore("/home/lgao/go/src/github.com/smartlon/gateway/adapter/iota/db")
 	if err != nil {
-
+		return nil,nil, err
 	}
 	defer store.Close()
-
-	em := event.NewEventMachine()
+    em := event.NewEventMachine()
 	// create an accurate time source (in this case Google's NTP server).
 	timesource := timesrc.NewNTPTimeSource("time.google.com")
-	account, err := builder.NewBuilder().
-		// the IOTA API to use
+	account, err = builder.NewBuilder().
+		// Load the IOTA API to use
 		WithAPI(iotaAPI).
-		// the database onject to use
+		// Load the database onject to use
 		WithStore(store).
-		// the seed of the account
-		WithSeed(SEED).
-		// the minimum weight magnitude for the Devnet
+		// Load the seed of the account
+		WithSeed(seed).
+		// Use the minimum weight magnitude for the Devnet
 		WithMWM(9).
-		// Load the EventMachine
-		WithEvents(em).
-		// the time source to use during input selection
+		// Load the time source to use during input selection
 		WithTimeSource(timesource).
-		// load the default plugins that enhance the functionality of the account
-		WithDefaultPlugins().
-		Build()
+	    // Load the EventMachine
+	    WithEvents(em).
+	    // Load the default plugins that enhance the functionality of the account
+	    WithDefaultPlugins().
+		// Load your custom plugin
+		Build( NewEventLoggerPlugin(em) )
 	if err != nil {
-		return nil, err
+		return nil,iotaAPI, err
 	}
-	return account,nil
+	return account,,iotaAPI,nil
 }

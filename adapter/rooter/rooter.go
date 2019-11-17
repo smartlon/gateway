@@ -7,8 +7,6 @@ import (
 
 func init() {
 	beego.Router("/iota/nodeinfo", &controller.LogisticsController{},"get:GetNodeInfo")
-	beego.Router("/iota/createmam", &controller.LogisticsController{},"post:CreateMAM")
-	beego.Router("/iota/blockmam", &controller.LogisticsController{},"post:BlockMAM")
 	beego.Router("/iota/mamtransmit", &controller.LogisticsController{},"post:MAMTransmit")
 	beego.Router("/iota/mamreceive", &controller.LogisticsController{},"post:MAMReceive")
 	beego.Router("/fabric/requestlogistic", &controller.LogisticsController{},"post:RequestLogistic")
