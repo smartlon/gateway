@@ -37,7 +37,7 @@ func init(){
 }
 
 func  CreateMAM(message []byte){
-	root, err := iotaClient.Transmitter.Transmit(message)
+	//root, err := iotaClient.Transmitter.Transmit(message)
 }
 func  BlockMAM(message []byte){
 

@@ -21,6 +21,5 @@ func NewConnection()(*api.API, error){
 	}
 	return api,nil
 
-
 }
 
