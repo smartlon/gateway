@@ -7,6 +7,7 @@ import (
 	"github.com/iotaledger/iota.go/consts"
 	"github.com/iotaledger/iota.go/mam/v1"
 	"log"
+	"strings"
 	"sync"
 )
 
@@ -65,7 +66,6 @@ func  BlockMAM(messageBytes []byte, root,sideKey string)(string,string, error){
 		return "","",err
 	}
 	var temperature string
-	var iotData IoTData
 	var messages []string
 	root,messages, err = mamClient.Receiver.Receive(root)
 	for root != "" {
@@ -74,6 +74,7 @@ func  BlockMAM(messageBytes []byte, root,sideKey string)(string,string, error){
 			fmt.Println(err.Error())
 			return "","",err
 		}
+		var iotData IoTData
 		iotDataBytes := convertData(messages)
 		json.Unmarshal(iotDataBytes,&iotData)
 		if iotData.Temperature == "" {
@@ -81,7 +82,7 @@ func  BlockMAM(messageBytes []byte, root,sideKey string)(string,string, error){
 		}
 		temperature += (iotData.Temperature + ",")
 	}
-	//temperature = temperature[:len(temperature)-2]
+	temperature = strings.TrimRight(temperature, ",")
 	message := string(messageBytes)
 	root,err =mamSend(message,sideKey)
 	return root,temperature,err
