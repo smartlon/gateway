@@ -41,6 +41,7 @@ func ChaincodeInvoke(chaincodeID string, argsArray []Args) (
 		return
 	}
 	action, err := newChaincodeInvokeAction()
+	defer action.Terminate()
 	action.Set(Config().ChannelID,chaincodeID,[]Args{})
 	if err != nil {
 		log.Errorf("Error while initializing invokeAction: %v", err)
@@ -49,7 +50,6 @@ func ChaincodeInvoke(chaincodeID string, argsArray []Args) (
 	var wg *sync.WaitGroup
 	wg.Add(1)
 	go listener(action,chaincodeID,wg)
-	defer action.Terminate()
 
 	result, err = action.invoke(Config().ChannelID, chaincodeID, argsArray)
 	if err != nil {
