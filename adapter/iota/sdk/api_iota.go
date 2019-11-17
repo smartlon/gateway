@@ -34,7 +34,7 @@ func init(){
 	once = &sync.Once{}
 	once.Do(func() {
 		iotaClient = IotaClient{
-			iotaApi,
+			&iotaApi,
 			receiver,
 			transmitter,
 		}

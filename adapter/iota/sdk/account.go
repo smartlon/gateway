@@ -40,11 +40,11 @@ func NewAccount() (account.Account, api.API, error) {
 		LocalProofOfWorkFunc: proofOfWorkFunc,
 	})
 	if err != nil {
-		return nil,nil, err
+		return nil,api.API{}, err
 	}
 	store, err := badger.NewBadgerStore("/home/lgao/go/src/github.com/smartlon/gateway/adapter/iota/db")
 	if err != nil {
-		return nil,nil, err
+		return nil,api.API{}, err
 	}
 	defer store.Close()
     em := event.NewEventMachine()
@@ -56,7 +56,7 @@ func NewAccount() (account.Account, api.API, error) {
 		// Load the database onject to use
 		WithStore(store).
 		// Load the seed of the account
-		WithSeed(seed).
+		WithSeed(SEED).
 		// Use the minimum weight magnitude for the Devnet
 		WithMWM(9).
 		// Load the time source to use during input selection
@@ -68,7 +68,7 @@ func NewAccount() (account.Account, api.API, error) {
 		// Load your custom plugin
 		Build( NewEventLoggerPlugin(em) )
 	if err != nil {
-		return nil,iotaAPI, err
+		return nil,*iotaAPI, err
 	}
-	return account,,iotaAPI,nil
+	return account,*iotaAPI,nil
 }
