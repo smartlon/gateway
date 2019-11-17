@@ -11,6 +11,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/pkg/errors"
+	"github.com/smartlon/gateway/adapter/iota/sdk"
 	"time"
 )
 
@@ -70,7 +71,16 @@ func  listener(action *chaincodeInvokeAction,chaincode string) error {
 			fmt.Println(err.Error())
 		}
 		fmt.Printf("received chaincode event CreateChannel:  %v\n", logisticstran)
-
+		root, err:= sdk.CreateMAM(ccEvent.Payload,logisticstran.MAMChannel.SideKey)
+		if err !=nil {
+			fmt.Printf("fabric failed to create MAM:  %v\n", err.Error())
+		}
+		var argsArray []Args
+		argsArray = append(argsArray, Args{"InTransitLogistics",[]string{logisticstran.ProductID,root}})
+		_, err = action.invoke(Config().ChannelID, chaincode, argsArray)
+		if err !=nil {
+			fmt.Printf("fabric  failed to callback for InTransitLogistics :  %v\n", err.Error())
+		}
 	case ccEvent,ok := <-notifierDeliveryLogistics:
 		if !ok {
 			return errors.WithMessage(err, "unexpected closed channel while waiting for chaincode event")
@@ -80,6 +90,16 @@ func  listener(action *chaincodeInvokeAction,chaincode string) error {
 			fmt.Println(err.Error())
 		}
 		fmt.Printf("received chaincode event DeliveryLogistics:  %v\n", logisticstran)
+		_,temperature,err := sdk.BlockMAM(ccEvent.Payload,logisticstran.MAMChannel.Root,logisticstran.MAMChannel.SideKey)
+		if err !=nil {
+			fmt.Printf("fabric failed to block MAM:  %v\n", err.Error())
+		}
+		var argsArray []Args
+		argsArray = append(argsArray, Args{"SignLogistics",[]string{logisticstran.ProductID,temperature}})
+		_, err = action.invoke(Config().ChannelID, chaincode, argsArray)
+		if err !=nil {
+			fmt.Printf("fabric  failed to callback for SignLogistics :  %v\n", err.Error())
+		}
 	case <-time.After(time.Second * 10):
 		fmt.Println("Exit while waiting for chaincode event")
 		}
