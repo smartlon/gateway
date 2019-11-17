@@ -22,9 +22,9 @@ func GetInMemorySeed(seed string)(inMemorySeed trinary.Trytes){
 	return inMemorySeed
 }
 
-func GetNewAddress(seed string,api *api.API)(trinary.Hashes){
+func GetNewAddress(seed string,iotaApi *api.API)(trinary.Hashes){
 	// GetNewAddress retrieves the first unspent from address through IRI
-	addresses, err := api.GetNewAddress(seed, api.GetNewAddressOptions{})
+	addresses, err := iotaApi.GetNewAddress(seed, api.GetNewAddressOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
