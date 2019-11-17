@@ -57,11 +57,11 @@ func (lc *LogisticsController) BlockMAM(){
 	var ret string
 	if err != nil {
 		code = "201"
-		message = "failed to create mam tx"
+		message = "failed to block mam tx"
 		ret = err.Error()
 	}else {
 		code = "200"
-		message = "successed to create mam tx"
+		message = "successed to block mam tx"
 		ret = mamMessages
 	}
 

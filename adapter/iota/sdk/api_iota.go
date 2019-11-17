@@ -76,9 +76,12 @@ func  BlockMAM(messageBytes []byte, root,sideKey string)(string,string, error){
 		}
 		iotDataBytes := convertData(messages)
 		json.Unmarshal(iotDataBytes,&iotData)
-		temperature += iotData.Temperature + ","
+		if iotData.Temperature == "" {
+			break
+		}
+		temperature += (iotData.Temperature + ",")
 	}
-	temperature = temperature[:len(temperature)-1]
+	//temperature = temperature[:len(temperature)-2]
 	message := string(messageBytes)
 	root,err =mamSend(message,sideKey)
 	return root,temperature,err
