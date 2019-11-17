@@ -6,7 +6,6 @@ import (
 	"github.com/iotaledger/iota.go/api"
 	"github.com/iotaledger/iota.go/consts"
 	"github.com/iotaledger/iota.go/mam/v1"
-	"github.com/smartlon/gateway/adapter/controller"
 	"log"
 	"sync"
 )
@@ -48,6 +47,12 @@ func init(){
 
 }
 
+type IoTData struct {
+	Temperature string `json:"Temperature"`
+	Location    string `json:"Location"`
+	Time        string `json:"Time"`
+}
+
 func  CreateMAM(messageBytes []byte, sideKey string)(string, error){
 	message := string(messageBytes)
 	return mamSend(message,sideKey)
@@ -60,7 +65,7 @@ func  BlockMAM(messageBytes []byte, root,sideKey string)(string,string, error){
 		return "","",err
 	}
 	var temperature string
-	var iotData controller.IoTData
+	var iotData IoTData
 	var messages []string
 	root,messages, err = mamClient.Receiver.Receive(root)
 	for root != "" {

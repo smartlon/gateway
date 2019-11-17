@@ -10,11 +10,7 @@ import (
 type LogisticsController struct {
 	beego.Controller
 }
-type IoTData struct {
-	Temperature string `json:"Temperature"`
-	Location    string `json:"Location"`
-	Time        string `json:"Time"`
-}
+
 
 type MAMTransmitReq struct {
 	Message IoTData `json:"Message"`
