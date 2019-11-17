@@ -13,35 +13,40 @@ import (
 
 )
 
-func listener(action *chaincodeInvokeAction) {
+const (
+	CHAINCODEID = "logistic"
 
-	ec, err := action.EventClient()
+)
+
+func listener(action *chaincodeInvokeAction)  {
+
+	ec, err := action.EventClient(event.WithBlockEvents())
 	if err != nil {
 		fmt.Println("failed to create client")
 	}
 
-	registrationCreateChannel, notifierCreateChannel, err := ec.RegisterChaincodeEvent("log", `{"From":"Fabric","To":"Iota","Func":"CreateChannel"}`)
+	registrationCreateChannel, notifierCreateChannel, err := ec.RegisterChaincodeEvent(CHAINCODEID, `{"From":"Fabric","To":"Iota","Func":"CreateChannel"}`)
 	if err != nil {
-		fmt.Println("failed to register chaincode event")
+		fmt.Println("failed to register chaincode event: CreateChannel")
+                
 	}
-	registrationDeliveryLogistics, notifierDeliveryLogistics, err := ec.RegisterChaincodeEvent("log", `{"From":"Fabric","To":"Iota","Func":"DeliveryLogistics"}`)
+	registrationDeliveryLogistics, notifierDeliveryLogistics, err := ec.RegisterChaincodeEvent(CHAINCODEID, `{"From":"Fabric","To":"Iota","Func":"DeliveryLogistics"}`)
 	if err != nil {
-		fmt.Println("failed to register chaincode event")
+		fmt.Println("failed to register chaincode event: DeliveryLogistics")
+                
 	}
 	defer unregister(ec,[]fab.Registration{registrationCreateChannel,registrationDeliveryLogistics})
-
-	select {
-	case ccEvent := <-notifierCreateChannel:
-		fmt.Printf("received chaincode event %v\n", ccEvent)
-	case ccEvent := <-notifierDeliveryLogistics:
-		fmt.Printf("received chaincode event %v\n", ccEvent)
-	case <-time.After(time.Second * 5):
-		fmt.Println("timeout while waiting for chaincode event")
-	}
-
-	// Timeout is expected since there is no event producer
-
-	// Output: timeout while waiting for chaincode event
+        
+        select {
+        case ccEvent := <-notifierCreateChannel:
+            fmt.Printf("received chaincode event CreateChannel:  %v\n", ccEvent)
+        case ccEvent := <-notifierDeliveryLogistics:
+            fmt.Printf("received chaincode event DeliveryLogistics:  %v\n", ccEvent)
+        case <-time.After(time.Second * 5):
+            fmt.Println("timeout while waiting for chaincode event")
+               
+               }
+        
 
 }
 
@@ -50,7 +55,6 @@ func unregister(ec *event.Client,registrations []fab.Registration) {
 		ec.Unregister(registration)
 	}
 }
-
 
 
 

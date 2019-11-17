@@ -11,10 +11,10 @@ func init() {
 	beego.Router("/iota/blockmam", &controller.LogisticsController{},"post:BlockMAM")
 	beego.Router("/iota/mamtransmit", &controller.LogisticsController{},"post:MAMTransmit")
 	beego.Router("/iota/mamreceive", &controller.LogisticsController{},"post:MAMReceive")
-	beego.Router("/faric/requestlogistic", &controller.LogisticsController{},"post:RequestLogistic")
-	beego.Router("/faric/transitlogistics", &controller.LogisticsController{},"post:TransitLogistics")
-	beego.Router("/faric/deliverylogistics", &controller.LogisticsController{},"post:DeliveryLogistics")
-	beego.Router("/faric/querylogistics", &controller.LogisticsController{},"get:QueryLogistics")
-	beego.Router("/faric/registeruser", &controller.LogisticsController{},"post:RegisterUser")
+	beego.Router("/fabric/requestlogistic", &controller.LogisticsController{},"post:RequestLogistic")
+	beego.Router("/fabric/transitlogistics", &controller.LogisticsController{},"post:TransitLogistics")
+	beego.Router("/fabric/deliverylogistics", &controller.LogisticsController{},"post:DeliveryLogistics")
+	beego.Router("/fabric/querylogistics", &controller.LogisticsController{},"post:QueryLogistics")
+	beego.Router("/fabric/registeruser", &controller.LogisticsController{},"post:RegisterUser")
 
 }

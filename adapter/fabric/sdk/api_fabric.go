@@ -42,10 +42,13 @@ func ChaincodeInvoke(chaincodeID string, argsArray []Args) (
 		return
 	}
 	action, err := newChaincodeInvokeAction()
+        
 	if err != nil {
 		log.Errorf("Error while initializing invokeAction: %v", err)
 		return
 	}
+        log.Infof("Starting chaincode event listener")
+       // go listener(action)
 
 	defer action.Terminate()
 

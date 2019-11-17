@@ -37,6 +37,30 @@ func (lc *LogisticsController) RegisterUser(){
 
 func (lc *LogisticsController) RequestLogistic(){
 	requestLogisticReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(requestLogisticReqBytes)
+        
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+func (lc *LogisticsController) TransitLogistics(){
+	requestLogisticReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(requestLogisticReqBytes)
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+func (lc *LogisticsController) DeliveryLogistics(){
+	requestLogisticReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(requestLogisticReqBytes)
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+func (lc *LogisticsController) QueryLogistics(){
+	requestLogisticReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(requestLogisticReqBytes)
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+func invokeController(requestLogisticReqBytes []byte)(code, message, ret string){
 	var requestLogisticReq sdk.Args
 	err := json.Unmarshal(requestLogisticReqBytes,&requestLogisticReq)
 	if err != nil {
@@ -44,20 +68,15 @@ func (lc *LogisticsController) RequestLogistic(){
 	}
 	var argsArray []sdk.Args
 	argsArray = append(argsArray, requestLogisticReq)
-	var ret string
+
 	ret, err = sdk.ChaincodeInvoke(CHAINCODEID, argsArray)
 	if err != nil {
 		log.Error(err)
+		message = err.Error()
+		code = "201"
+	}else {
+		message = "request logistics success"
+		code = "200"
 	}
-	lc.Data["json"] = map[string]interface{}{"code": 200,"message": err, "result": ret}
-	lc.ServeJSON()
-}
-func (lc *LogisticsController) TransitLogistics(){
-
-}
-func (lc *LogisticsController) DeliveryLogistics(){
-
-}
-func (lc *LogisticsController) QueryLogistics(){
-
+	return
 }

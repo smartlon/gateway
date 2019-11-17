@@ -397,7 +397,7 @@ func (action *Action) GetOrgID(mspID string) (string, error) {
 func (action *Action) User() (mspapi.SigningIdentity, error) {
 	userName := Config().UserName
 	if userName == "" {
-		userName = defaultUser
+		userName = adminUser
 	}
 	return action.OrgUser(action.OrgID(), userName)
 }
