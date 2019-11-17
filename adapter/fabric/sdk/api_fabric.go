@@ -40,7 +40,7 @@ func ChaincodeListen(chaincodeID string) (err error) {
 		return
 	}
 	action, err := newChaincodeListenAction()
-
+	action.Set(Config().ChannelID,chaincodeID,[]Args{})
 	if err != nil {
 		log.Errorf("Error while initializing listenAction: %v", err)
 		return

@@ -13,10 +13,7 @@ const (
 )
 
 func init() {
-	err := sdk.ChaincodeListen(CHAINCODEID)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	go sdk.ChaincodeListen(CHAINCODEID)
 }
 
 type UserReq struct {
