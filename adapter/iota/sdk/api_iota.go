@@ -6,11 +6,13 @@ import (
 	"github.com/iotaledger/iota.go/api"
 	"github.com/iotaledger/iota.go/consts"
 	"github.com/iotaledger/iota.go/mam/v1"
+	"github.com/smartlon/gateway/adapter/controller"
 	"log"
 	"sync"
 )
 
 type MAMClient struct {
+
 	Api *mam.API
 	Receiver *mam.Receiver
 	Transmitter *mam.Transmitter
@@ -21,12 +23,11 @@ var iotaApi *api.API
 var once *sync.Once
 
 func init(){
-	account, iotaMAMApi,err := NewAccount()
+	_, iotaMAMApi,err := NewAccount()
 	if err != nil {
 		log.Fatal(err)
 	}
-	account.Start()
-	defer account.Shutdown()
+	//account.Start()
 	receiver := mam.NewReceiver(iotaMAMApi)
 	transmitter := mam.NewTransmitter(iotaMAMApi,GetInMemorySeed(SEED),MWM,consts.SecurityLevelMedium)
 	if err != nil {
@@ -51,9 +52,31 @@ func  CreateMAM(messageBytes []byte, sideKey string)(string, error){
 	message := string(messageBytes)
 	return mamSend(message,sideKey)
 }
-func  BlockMAM(messageBytes []byte, sideKey string)(string, error){
+func  BlockMAM(messageBytes []byte, root,sideKey string)(string,string, error){
+	var err error
+	err = mamClient.Receiver.SetMode(mam.ChannelModeRestricted,sideKey)
+	if err != nil {
+		fmt.Println(err.Error())
+		return "","",err
+	}
+	var temperature string
+	var iotData controller.IoTData
+	var messages []string
+	root,messages, err = mamClient.Receiver.Receive(root)
+	for root != "" {
+		root,messages, err = mamClient.Receiver.Receive(root)
+		if err != nil {
+			fmt.Println(err.Error())
+			return "","",err
+		}
+		iotDataBytes := convertData(messages)
+		json.Unmarshal(iotDataBytes,&iotData)
+		temperature += iotData.Temperature + ","
+	}
+	temperature = temperature[:len(temperature)-1]
 	message := string(messageBytes)
-	return mamSend(message,sideKey)
+	root,err =mamSend(message,sideKey)
+	return root,temperature,err
 }
 
 func MAMTransmit(message, sideKey string) (string, error){
@@ -74,25 +97,35 @@ func mamSend( message, sideKey string) (string, error ){
 	return root, nil
 }
 
-func  MAMReceive(sideKey, root string) ([]string, error ){
-	err := mamClient.Receiver.SetMode(mam.ChannelModeRestricted,sideKey)
+func  MAMReceive(sideKey, root string) (string, error ){
+	var err error
+	err = mamClient.Receiver.SetMode(mam.ChannelModeRestricted,sideKey)
 	if err != nil {
 		fmt.Println(err.Error())
-		return []string{},err
+		return "",err
 	}
-	messages := make([]string,0)
-	message := make([]string,0)
+	var iotDataAllBytes []byte
+
+	var messages []string
 	for root != "" {
-		root,message, err = mamClient.Receiver.Receive(root)
+		root,messages, err = mamClient.Receiver.Receive(root)
 		if err != nil {
 			fmt.Println(err.Error())
-			return []string{},err
+			return "",err
 		}
-		for _,str := range message {
-			messages = append(messages,str)
-		}
+		iotDataBytes := convertData(messages)
+		iotDataAllBytes =append(iotDataAllBytes,iotDataBytes...)
+
 	}
-	return messages,nil
+	return string(iotDataAllBytes),nil
+}
+
+func convertData(messages []string) []byte{
+	var temp string
+	for _,message := range messages {
+		temp += message
+	}
+	return []byte(temp)
 }
 
 

@@ -10,15 +10,70 @@ import (
 type LogisticsController struct {
 	beego.Controller
 }
+type IoTData struct {
+	Temperature string `json:"Temperature"`
+	Location    string `json:"Location"`
+	Time        string `json:"Time"`
+}
 
 type MAMTransmitReq struct {
-	Message string `json:"Message"`
+	Message IoTData `json:"Message"`
 	SideKey string `json:"SideKey"`
 }
 type MAMReceiveReq struct {
 	Root string `json:"Root"`
 	SideKey string `json:"SideKey"`
 }
+
+func (lc *LogisticsController) CreateMAM(){
+	mamReqBytes := lc.Ctx.Input.RequestBody
+	var mamReq MAMReceiveReq
+	err := json.Unmarshal(mamReqBytes,&mamReq)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	mamMessages,err := CreateMAM([]byte(mamReq.Root),mamReq.SideKey)
+	var code,message string
+	var ret string
+	if err != nil {
+		code = "201"
+		message = "failed to create mam tx"
+		ret = err.Error()
+	}else {
+		code = "200"
+		message = "successed to create mam tx"
+		ret = mamMessages
+	}
+
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+
+func (lc *LogisticsController) BlockMAM(){
+	mamReqBytes := lc.Ctx.Input.RequestBody
+	var mamReq MAMReceiveReq
+	err := json.Unmarshal(mamReqBytes,&mamReq)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	_,mamMessages,err := BlockMAM([]byte(mamReq.Root),mamReq.Root,mamReq.SideKey)
+	var code,message string
+	var ret string
+	if err != nil {
+		code = "201"
+		message = "failed to create mam tx"
+		ret = err.Error()
+	}else {
+		code = "200"
+		message = "successed to create mam tx"
+		ret = mamMessages
+	}
+
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+
+
 
 func (lc *LogisticsController) MAMTransmit(){
 	mamReqBytes := lc.Ctx.Input.RequestBody
@@ -27,7 +82,11 @@ func (lc *LogisticsController) MAMTransmit(){
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	root,err := MAMTransmit(mamReq.Message,mamReq.SideKey)
+	iotDataBytes,err := json.Marshal(mamReq.Message)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	root,err := MAMTransmit(string(iotDataBytes),mamReq.SideKey)
 	var code,message,ret string
 	if err != nil {
 		code = "201"
@@ -54,11 +113,11 @@ func (lc *LogisticsController) MAMReceive(){
 	}
 	mamMessages,err := MAMReceive(mamReq.SideKey,mamReq.Root)
 	var code,message string
-	var ret []string
+	var ret string
 	if err != nil {
 		code = "201"
 		message = "failed to receive mam tx"
-		ret = []string{err.Error()}
+		ret = err.Error()
 	}else {
 		code = "200"
 		message = "successed to receive mam tx"
