@@ -47,9 +47,9 @@ func ChaincodeInvoke(chaincodeID string, argsArray []Args) (
 		log.Errorf("Error while initializing invokeAction: %v", err)
 		return
 	}
-	var wg *sync.WaitGroup
+	var wg sync.WaitGroup
 	wg.Add(1)
-	go listener(action,chaincodeID,wg)
+	go listener(action,chaincodeID,&wg)
 
 	result, err = action.invoke(Config().ChannelID, chaincodeID, argsArray)
 	if err != nil {
