@@ -78,7 +78,9 @@ func (lc *LogisticsController) MAMTransmit(){
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	iotDataBytes,err := json.Marshal(mamReq.Message)
+	var data IoTData
+	data = mamReq.Message
+	iotDataBytes,err := json.Marshal(data)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
