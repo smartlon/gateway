@@ -114,6 +114,7 @@ func (t *logisticstrans) TransitLogistics(stub shim.ChaincodeStubInterface, args
 	logisticobj.LogisticsID = args[1]
 	logisticobj.LogisticsLocation = args[2]
 	logisticobj.JourneyStartTime = args[3]
+	logisticobj.MAMChannel.SideKey = args[4]
 	if logisticobj.Status != "Requested" {
 		fmt.Println("we cannnot transit  the product which was not requested")
 		return shim.Error("we cannnot transit  the product which was not requested")
@@ -145,7 +146,6 @@ func (t *logisticstrans) InTransitLogistics(stub shim.ChaincodeStubInterface, ar
 	json.Unmarshal(logisticsAsBytes, &logisticobj)
 	logisticobj.ProductID = args[0]
 	logisticobj.MAMChannel.Root = args[1]
-	logisticobj.MAMChannel.SideKey = args[2]
 
 	if logisticobj.Status != "Ready-Transit" {
 		fmt.Println("we cannnot transit  the product which was not Ready_Transit")

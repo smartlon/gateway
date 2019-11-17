@@ -1,7 +1,7 @@
 package sdk
 
 import (
-	. "github.com/iotaledger/iota.go/api"
+	 "github.com/iotaledger/iota.go/api"
 	"github.com/iotaledger/iota.go/pow"
 )
 
@@ -9,10 +9,10 @@ import (
 
 //NewConnection establishes a connection with the given endpoint
 
-func NewConnection()(*API, error){
+func NewConnection()(*api.API, error){
 	_, proofOfWorkFunc := pow.GetFastestProofOfWorkImpl()
 	//endpoint := beego.AppConfig.String("endpoint")
-	api, err := ComposeAPI(HTTPClientSettings{
+	api, err := api.ComposeAPI(api.HTTPClientSettings{
 		URI:ENDPOINT,
 		LocalProofOfWorkFunc: proofOfWorkFunc,
 	})

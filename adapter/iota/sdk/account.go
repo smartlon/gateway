@@ -20,7 +20,9 @@ func GetInMemorySeed(seed string)(inMemorySeed trinary.Trytes){
 func GetNewAddress(seed string,api *API)(trinary.Hashes){
 	// GetNewAddress retrieves the first unspent from address through IRI
 	addresses, err := api.GetNewAddress(seed, GetNewAddressOptions{})
-	Must(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println("\nYour new address: ", addresses[0])
 	return addresses
 }
