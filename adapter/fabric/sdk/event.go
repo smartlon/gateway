@@ -60,7 +60,7 @@ func  listener(action *chaincodeInvokeAction,chaincode string,wg *sync.WaitGroup
 		return err
 	}
 	defer  unregister(ec,[]fab.Registration{registrationCreateChannel,registrationDeliveryLogistics})
-	var logisticstran logisticstrans
+	var logisticstran logisticstrans 
 
 	select {
 	case ccEvent,ok := <-notifierCreateChannel:
