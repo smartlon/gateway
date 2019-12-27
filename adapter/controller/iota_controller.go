@@ -14,62 +14,13 @@ type LogisticsController struct {
 
 type MAMTransmitReq struct {
 	Message IoTData `json:"Message"`
-	SideKey string `json:"SideKey"`
+	Seed string     `json:"Seed"`
+	SideKey string  `json:"SideKey"`
 }
 type MAMReceiveReq struct {
 	Root string `json:"Root"`
 	SideKey string `json:"SideKey"`
 }
-
-func (lc *LogisticsController) CreateMAM(){
-	mamReqBytes := lc.Ctx.Input.RequestBody
-	var mamReq MAMReceiveReq
-	err := json.Unmarshal(mamReqBytes,&mamReq)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	mamMessages,err := CreateMAM([]byte(mamReq.Root),mamReq.SideKey)
-	var code,message string
-	var ret string
-	if err != nil {
-		code = "201"
-		message = "failed to create mam tx"
-		ret = err.Error()
-	}else {
-		code = "200"
-		message = "successed to create mam tx"
-		ret = mamMessages
-	}
-
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
-	lc.ServeJSON()
-}
-
-func (lc *LogisticsController) BlockMAM(){
-	mamReqBytes := lc.Ctx.Input.RequestBody
-	var mamReq MAMReceiveReq
-	err := json.Unmarshal(mamReqBytes,&mamReq)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	_,mamMessages,err := BlockMAM([]byte(mamReq.Root),mamReq.Root,mamReq.SideKey)
-	var code,message string
-	var ret string
-	if err != nil {
-		code = "201"
-		message = "failed to block mam tx"
-		ret = err.Error()
-	}else {
-		code = "200"
-		message = "successed to block mam tx"
-		ret = mamMessages
-	}
-
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
-	lc.ServeJSON()
-}
-
-
 
 func (lc *LogisticsController) MAMTransmit(){
 	mamReqBytes := lc.Ctx.Input.RequestBody
@@ -84,7 +35,7 @@ func (lc *LogisticsController) MAMTransmit(){
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	root,err := MAMTransmit(string(iotDataBytes),mamReq.SideKey)
+	_,root := MAMTransmit(string(iotDataBytes),mamReq.Seed,"restricted",mamReq.SideKey,mamReq.Message.ContainerID)
 	var code,message,ret string
 	if err != nil {
 		code = "201"
@@ -109,13 +60,13 @@ func (lc *LogisticsController) MAMReceive(){
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	mamMessages,err := MAMReceive(mamReq.SideKey,mamReq.Root)
+	mamMessages := MAMReceive(mamReq.Root,"restricted",mamReq.SideKey)
 	var code,message string
-	var ret string
+	var ret []string
 	if err != nil {
 		code = "201"
 		message = "failed to receive mam tx"
-		ret = err.Error()
+		ret = append(ret,err.Error())
 	}else {
 		code = "200"
 		message = "successed to receive mam tx"

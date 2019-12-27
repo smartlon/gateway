@@ -33,19 +33,18 @@ func RegisterUser(username, pwd string) (
 }
 
 // ChaincodeInvoke invoke chaincode
-func ChaincodeInvoke(chaincodeID string, argsArray []Args) (
-	result string, err error) {
+func ChaincodeInvoke(chaincodeID string, argsArray []Args) (result string, err error)  {
 	log.Info("chaincode invoke...")
 	if chaincodeID == "" {
 		err = fmt.Errorf("must specify the chaincode ID")
-		return
+		return "" , err
 	}
 	action, err := newChaincodeInvokeAction()
 	defer action.Terminate()
 	action.Set(Config().ChannelID,chaincodeID,[]Args{})
 	if err != nil {
 		log.Errorf("Error while initializing invokeAction: %v", err)
-		return
+		return "" , err
 	}
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -56,7 +55,7 @@ func ChaincodeInvoke(chaincodeID string, argsArray []Args) (
 		log.Errorf("Error while calling action.invoke(): %v", err)
 	}
 	wg.Wait()
-	return
+	return result, err
 }
 
 // ChaincodeInvokeByString call chaincode invoke of hyperledger fabric

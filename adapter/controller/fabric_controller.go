@@ -43,31 +43,50 @@ func (lc *LogisticsController) RequestLogistic(){
 	lc.ServeJSON()
 }
 func (lc *LogisticsController) TransitLogistics(){
-	requestLogisticReqBytes := lc.Ctx.Input.RequestBody
-	code, message, ret := invokeController(requestLogisticReqBytes)
+	transitLogisticReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(transitLogisticReqBytes)
 	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
 	lc.ServeJSON()
 }
 func (lc *LogisticsController) DeliveryLogistics(){
-	requestLogisticReqBytes := lc.Ctx.Input.RequestBody
-	code, message, ret := invokeController(requestLogisticReqBytes)
+	deliveryLogisticReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(deliveryLogisticReqBytes)
 	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
 	lc.ServeJSON()
 }
 func (lc *LogisticsController) QueryLogistics(){
-	requestLogisticReqBytes := lc.Ctx.Input.RequestBody
-	code, message, ret := invokeController(requestLogisticReqBytes)
+	queryLogisticReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(queryLogisticReqBytes)
 	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
 	lc.ServeJSON()
 }
-func invokeController(requestLogisticReqBytes []byte)(code, message, ret string){
-	var requestLogisticReq sdk.Args
-	err := json.Unmarshal(requestLogisticReqBytes,&requestLogisticReq)
+
+func (lc *LogisticsController) RecordContainer(){
+	recordContainerReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(recordContainerReqBytes)
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+func (lc *LogisticsController) QueryContainer(){
+	queryContainerReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(queryContainerReqBytes)
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+func (lc *LogisticsController) QueryAllContainers(){
+	queryAllContainersReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(queryAllContainersReqBytes)
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+func invokeController(invokeReqBytes []byte)(code, message, ret string){
+	var invokeReq sdk.Args
+	err := json.Unmarshal(invokeReqBytes,&invokeReq)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	var argsArray []sdk.Args
-	argsArray = append(argsArray, requestLogisticReq)
+	argsArray = append(argsArray, invokeReq)
 
 	ret, err = sdk.ChaincodeInvoke(CHAINCODEID, argsArray)
 	if err != nil {
@@ -75,7 +94,7 @@ func invokeController(requestLogisticReqBytes []byte)(code, message, ret string)
 		message = err.Error()
 		code = "201"
 	}else {
-		message = "request logistics success"
+		message = "invoke " +invokeReq.Func+ " success"
 		code = "200"
 	}
 	return
