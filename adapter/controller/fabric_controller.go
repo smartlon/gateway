@@ -90,14 +90,14 @@ func invokeController(invokeReqBytes []byte)(code, message, ret string){
 		fmt.Println(err.Error())
 	}
 	if invokeReq.Func == "RecordContainer" {
-		timestamp := Timestamp()
-		seed := GenerateRandomSeedString(81)
-		sidekey := GenerateRandomSeedString(81)
+		timestamp := timeStamp()
+		seed := generateRandomSeedString(81)
+		sidekey := generateRandomSeedString(81)
 		argscomposite := []string{timestamp,seed,sidekey}
 		invokeReq.Args = append(invokeReq.Args,argscomposite...)
 	}
 	if (invokeReq.Func == "TransitLogistics" || invokeReq.Func == "DeliveryLogistics") {
-		timestamp := Timestamp()
+		timestamp := timeStamp()
 		invokeReq.Args = append(invokeReq.Args,timestamp)
 	}
 	var argsArray []sdk.Args
@@ -116,11 +116,11 @@ func invokeController(invokeReqBytes []byte)(code, message, ret string){
 }
 
 
-func Timestamp() string {
+func timeStamp() string {
 	return strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
 }
 
-func GenerateRandomSeedString(length int) string {
+func generateRandomSeedString(length int) string {
 	seed := ""
 	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZ9"
 
