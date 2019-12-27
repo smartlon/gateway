@@ -68,7 +68,7 @@ func  listener(action *chaincodeInvokeAction,chaincode string,wg *sync.WaitGroup
 			"start",
 		}
 		iotdatabytes,_ := json.Marshal(iotdata)
-		mamstat, root:= sdk.MAMTransmit(string(iotdatabytes),iotapayload.Seed,iotapayload.Mode,iotapayload.SideKey,"Fabric")
+		mamstat, root:= sdk.MAMTransmit(string(iotdatabytes),iotapayload.Seed,iotapayload.Mode,iotapayload.SideKey,"FABRIC")
 
 		var argsArray []Args
 		argsArray = append(argsArray, Args{"InTransitLogistics",[]string{iotapayload.ContainerID,root,mamstat}})
@@ -94,7 +94,7 @@ func  listener(action *chaincodeInvokeAction,chaincode string,wg *sync.WaitGroup
 			"end",
 		}
 		iotdatabytes,_ := json.Marshal(iotdata)
-		sdk.MAMTransmit(string(iotdatabytes),iotapayload.Seed,iotapayload.Mode,iotapayload.SideKey,"Fabric")
+		sdk.MAMTransmit(string(iotdatabytes),iotapayload.Seed,iotapayload.Mode,iotapayload.SideKey,"FABRIC")
 		var argsArray []Args
 		iotdatas := sdk.MAMReceive(iotapayload.Root,iotapayload.Mode,iotapayload.SideKey)
 		var temperature string

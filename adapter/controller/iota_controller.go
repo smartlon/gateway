@@ -35,7 +35,7 @@ func (lc *LogisticsController) MAMTransmit(){
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	_,root := MAMTransmit(string(iotDataBytes),mamReq.Seed,"restricted",mamReq.SideKey,mamReq.Message.ContainerID)
+	_,root := MAMTransmit(string(iotDataBytes),mamReq.Seed,"restricted",mamReq.SideKey,"")
 	var code,message,ret string
 	if err != nil {
 		code = "201"
