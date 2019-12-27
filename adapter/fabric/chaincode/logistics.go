@@ -276,7 +276,7 @@ func (t *SmartContract) RequestLogistic(stub shim.ChaincodeStubInterface, args [
 //TransitLogistics at the same time measuring the temp details from logistics
 func (t *SmartContract) TransitLogistics(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	if len(args) != 4 {
+	if len(args) != 5 {
 		return shim.Error("Incorrect number of arguments. Expecting Minimum 3")
 	}
 	logisticsAsBytes, _ := stub.GetState(args[0])
@@ -284,9 +284,9 @@ func (t *SmartContract) TransitLogistics(stub shim.ChaincodeStubInterface, args 
 	json.Unmarshal(logisticsAsBytes, &logisticobj)
 	logisticobj.LogisticstranID = args[0]
 	logisticobj.MAMChannel.ContainerID = args[1]
-	sideKey := GenerateRandomSeedString(81)
+	sideKey := args[3]
 	logisticobj.MAMChannel.SideKey = sideKey
-	timestamp := args[3]
+	timestamp := args[4]
 	logisticobj.JourneyStartTime = timestamp
 
 	containerAsBytes, _ := stub.GetState(args[1])
@@ -396,7 +396,7 @@ func (t *SmartContract) DeliveryLogistics(stub shim.ChaincodeStubInterface, args
 
 func (t *SmartContract) SignLogistics(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	if len(args) < 1 {
+	if len(args) != 2 {
 		return shim.Error("Invalid   no of arg for Sign function ")
 
 	}

@@ -96,7 +96,13 @@ func invokeController(invokeReqBytes []byte)(code, message, ret string){
 		argscomposite := []string{timestamp,seed,sidekey}
 		invokeReq.Args = append(invokeReq.Args,argscomposite...)
 	}
-	if (invokeReq.Func == "TransitLogistics" || invokeReq.Func == "DeliveryLogistics") {
+	if invokeReq.Func == "TransitLogistics"  {
+		timestamp := timeStamp()
+		sidekey := generateRandomSeedString(81)
+		argscomposite := []string{sidekey,timestamp}
+		invokeReq.Args = append(invokeReq.Args,argscomposite...)
+	}
+	if  invokeReq.Func == "DeliveryLogistics" {
 		timestamp := timeStamp()
 		invokeReq.Args = append(invokeReq.Args,timestamp)
 	}
