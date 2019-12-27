@@ -19,7 +19,7 @@ func MAMTransmit(message string, seed string, mode string, sideKey string, trans
 	return MamStateToString(channel), root
 }
 
-func  MAMReceive( root string, mode string, sideKey string,) ([]string ){
+func  MAMReceive( root string, mode string, sideKey string) ([]string ){
 	channelMessages := Fetch(root,mode,sideKey)
 	return channelMessages
 }

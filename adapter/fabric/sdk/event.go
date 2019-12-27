@@ -11,7 +11,9 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/pkg/errors"
-	//"github.com/smartlon/gateway/adapter/iota/sdk"
+	"github.com/smartlon/gateway/adapter/iota/sdk"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -56,17 +58,24 @@ func  listener(action *chaincodeInvokeAction,chaincode string,wg *sync.WaitGroup
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		//fmt.Printf("received chaincode event CreateChannel:  %v\n", logisticstran)
-		//mamstat, root:= sdk.MAMTransmit(ccEvent.Payload,logisticstran.MAMChannel.SideKey)
-		//if err !=nil {
-		//	fmt.Printf("fabric failed to create MAM:  %v\n", err.Error())
-		//}
-		//var argsArray []Args
-		//argsArray = append(argsArray, Args{"InTransitLogistics",[]string{logisticstran.ProductID,root}})
-		//_, err = action.invoke(Config().ChannelID, chaincode, argsArray)
-		//if err !=nil {
-		//	fmt.Printf("fabric  failed to callback for InTransitLogistics :  %v\n", err.Error())
-		//}
+		fmt.Printf("received chaincode event CreateChannel:  %v\n", iotapayload)
+		timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
+		iotdata := &sdk.IoTData{
+			iotapayload.ContainerID,
+			"",
+			"",
+			timestamp,
+			"start",
+		}
+		iotdatabytes,_ := json.Marshal(iotdata)
+		mamstat, root:= sdk.MAMTransmit(string(iotdatabytes),iotapayload.Seed,iotapayload.Mode,iotapayload.SideKey,"Fabric"+iotapayload.ContainerID)
+
+		var argsArray []Args
+		argsArray = append(argsArray, Args{"InTransitLogistics",[]string{iotapayload.ContainerID,root,mamstat}})
+		_, err = action.invoke(Config().ChannelID, chaincode, argsArray)
+		if err !=nil {
+			fmt.Printf("fabric  failed to callback for InTransitLogistics :  %v\n", err.Error())
+		}
 	case ccEvent,ok := <-notifierDeliveryLogistics:
 		if !ok {
 			return errors.WithMessage(err, "unexpected closed channel while waiting for chaincode event")
@@ -76,16 +85,33 @@ func  listener(action *chaincodeInvokeAction,chaincode string,wg *sync.WaitGroup
 			fmt.Println(err.Error())
 		}
 		fmt.Printf("received chaincode event DeliveryLogistics:  %v\n", iotapayload)
-		//_,temperature,err := sdk.BlockMAM(ccEvent.Payload,logisticstran.MAMChannel.Root,logisticstran.MAMChannel.SideKey)
-		//if err !=nil {
-		//	fmt.Printf("fabric failed to block MAM:  %v\n", err.Error())
-		//}
-		//var argsArray []Args
-		//argsArray = append(argsArray, Args{"SignLogistics",[]string{logisticstran.ProductID,temperature}})
-		//_, err = action.invoke(Config().ChannelID, chaincode, argsArray)
-		//if err !=nil {
-		//	fmt.Printf("fabric  failed to callback for SignLogistics :  %v\n", err.Error())
-		//}
+		timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
+		iotdata := &sdk.IoTData{
+			iotapayload.ContainerID,
+			"",
+			"",
+			timestamp,
+			"end",
+		}
+		iotdatabytes,_ := json.Marshal(iotdata)
+		sdk.MAMTransmit(string(iotdatabytes),iotapayload.Seed,iotapayload.Mode,iotapayload.SideKey,"Fabric"+iotapayload.ContainerID)
+		var argsArray []Args
+		iotdatas := sdk.MAMReceive(iotapayload.Root,iotapayload.Mode,iotapayload.SideKey)
+		var temperature string
+		for _,iotdata := range iotdatas {
+			var iot sdk.IoTData
+			err := json.Unmarshal([]byte(iotdata),&iot)
+			if err != nil {
+				fmt.Printf("fabric  failed to callback for SignLogistics :  %v\n", err.Error())
+			}
+			temperature = temperature + iot.Temperature + ","
+		}
+		temperature = strings.TrimSuffix(temperature,",")
+		argsArray = append(argsArray, Args{"SignLogistics",[]string{iotapayload.ContainerID,temperature}})
+		_, err = action.invoke(Config().ChannelID, chaincode, argsArray)
+		if err !=nil {
+			fmt.Printf("fabric  failed to callback for SignLogistics :  %v\n", err.Error())
+		}
 	case <-time.After(time.Second * 3):
 		fmt.Println("Exit while waiting for chaincode event")
 		}

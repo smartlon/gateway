@@ -55,7 +55,7 @@ func StartTxFeed() {
 			//fmt.Printf("tx: trytes received. Skip.\n")
 			continue
 		}
-		if tx.Tag == transactionTag {
+		if tx.Tag == chainTag {
 			fmt.Printf("received tx: %s\n",tx)
 		}
 
