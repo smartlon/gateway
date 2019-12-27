@@ -1,10 +1,14 @@
 package controller
 
 import (
+	"crypto/rand"
 	"github.com/smartlon/gateway/adapter/fabric/sdk"
 	"encoding/json"
 	"fmt"
 	"github.com/smartlon/gateway/adapter/log"
+	"math/big"
+	"strconv"
+	"time"
 )
 
 const (
@@ -85,6 +89,17 @@ func invokeController(invokeReqBytes []byte)(code, message, ret string){
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+	if invokeReq.Func == "RecordContainer" {
+		timestamp := Timestamp()
+		seed := GenerateRandomSeedString(81)
+		sidekey := GenerateRandomSeedString(81)
+		argscomposite := []string{timestamp,seed,sidekey}
+		invokeReq.Args = append(invokeReq.Args,argscomposite...)
+	}
+	if (invokeReq.Func == "TransitLogistics" || invokeReq.Func == "DeliveryLogistics") {
+		timestamp := Timestamp()
+		invokeReq.Args = append(invokeReq.Args,timestamp)
+	}
 	var argsArray []sdk.Args
 	argsArray = append(argsArray, invokeReq)
 
@@ -98,4 +113,23 @@ func invokeController(invokeReqBytes []byte)(code, message, ret string){
 		code = "200"
 	}
 	return
+}
+
+
+func Timestamp() string {
+	return strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
+}
+
+func GenerateRandomSeedString(length int) string {
+	seed := ""
+	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZ9"
+
+	for i := 0; i < length; i++ {
+		n, err := rand.Int(rand.Reader, big.NewInt(27))
+		if err != nil {
+			fmt.Println(err)
+		}
+		seed += string(alphabet[n.Int64()])
+	}
+	return seed
 }

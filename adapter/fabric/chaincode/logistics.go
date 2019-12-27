@@ -5,14 +5,12 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+	pb "github.com/hyperledger/fabric/protos/peer"
 	"log"
 	"math/big"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
 type SmartContract struct {
@@ -95,39 +93,38 @@ func main() {
 
 //Init logisticstrans
 func (t *SmartContract) Init(stub shim.ChaincodeStubInterface) pb.Response {
-	timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
-	containers := []Container{
-		Container{ContainerID: "container1",Description: "", Location: "67.0006, -70.5476", Timestamp: timestamp, Holder: "Freight Forwarder",Used:"false"},
-		Container{ContainerID: "container2",Description: "", Location: "91.2395, -49.4594", Timestamp: timestamp, Holder: "Freight Forwarder",Used:"false"},
-		Container{ContainerID: "container3",Description: "", Location: "58.0148, 59.01391", Timestamp: timestamp, Holder: "Freight Forwarder",Used:"false"},
-	}
-
-	i := 0
-	for i < len(containers) {
-		containerAsBytes, _ := json.Marshal(containers[i])
-		stub.PutState(containers[i].ContainerID, containerAsBytes)
-
-		mode := "restricted"
-		seed := GenerateRandomSeedString(81)
-		sideKey := GenerateRandomSeedString(81)
-
-		iotaPayload := IotaPayload{ContainerID:containers[i].ContainerID,Seed: seed, MamState: "", Root: "", Mode: mode, SideKey: sideKey}
-		iotaPayloadAsBytes, _ := json.Marshal(iotaPayload)
-		stub.PutState("iotapayload" + containers[i].ContainerID, iotaPayloadAsBytes)
-
-		fmt.Println("New Asset", strconv.Itoa(i+1), containers[i], seed, mode, sideKey)
-		i = i + 1
-	}
+	//timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
+	//containers := []Container{
+	//	Container{ContainerID: "container1",Description: "", Location: "67.0006, -70.5476", Timestamp: timestamp, Holder: "Freight Forwarder",Used:"false"},
+	//	Container{ContainerID: "container2",Description: "", Location: "91.2395, -49.4594", Timestamp: timestamp, Holder: "Freight Forwarder",Used:"false"},
+	//	Container{ContainerID: "container3",Description: "", Location: "58.0148, 59.01391", Timestamp: timestamp, Holder: "Freight Forwarder",Used:"false"},
+	//}
+	//
+	//i := 0
+	//for i < len(containers) {
+	//	containerAsBytes, _ := json.Marshal(containers[i])
+	//	stub.PutState(containers[i].ContainerID, containerAsBytes)
+	//
+	//	mode := "restricted"
+	//	seed := GenerateRandomSeedString(81)
+	//	sideKey := GenerateRandomSeedString(81)
+	//
+	//	iotaPayload := IotaPayload{ContainerID:containers[i].ContainerID,Seed: seed, MamState: "", Root: "", Mode: mode, SideKey: sideKey}
+	//	iotaPayloadAsBytes, _ := json.Marshal(iotaPayload)
+	//	stub.PutState("iotapayload" + containers[i].ContainerID, iotaPayloadAsBytes)
+	//
+	//	fmt.Println("New Asset", strconv.Itoa(i+1), containers[i], seed, mode, sideKey)
+	//	i = i + 1
+	//}
 	fmt.Println("Initiate the chaincode")
 	return shim.Success(nil)
 }
 
 func (s *SmartContract) RecordContainer(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 4 {
+	if len(args) != 7 {
 		return shim.Error("Incorrect number of arguments. Expecting 5")
 	}
-	timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
-	container := Container{ ContainerID:args[0],Description: args[1], Location: args[2], Timestamp: timestamp, Holder: args[3],Used:"false" }
+	container := Container{ ContainerID:args[0],Description: args[1], Location: args[2], Timestamp: args[4], Holder: args[3],Used:"false" }
 
 	containerAsBytes, _ := json.Marshal(container)
 	err := stub.PutState(args[0], containerAsBytes)
@@ -136,8 +133,8 @@ func (s *SmartContract) RecordContainer(stub shim.ChaincodeStubInterface, args [
 	}
 
 	mode := "restricted"
-	seed := GenerateRandomSeedString(81)
-	sideKey := GenerateRandomSeedString(81)
+	seed := args[5]
+	sideKey := args[6]
 
 	iotaPayload := IotaPayload{ContainerID:args[0],Seed: seed, MamState: "", Root: "", Mode: mode, SideKey: sideKey}
 	iotaPayloadAsBytes, _ := json.Marshal(iotaPayload)
@@ -279,7 +276,7 @@ func (t *SmartContract) RequestLogistic(stub shim.ChaincodeStubInterface, args [
 //TransitLogistics at the same time measuring the temp details from logistics
 func (t *SmartContract) TransitLogistics(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	if len(args) != 3 {
+	if len(args) != 4 {
 		return shim.Error("Incorrect number of arguments. Expecting Minimum 3")
 	}
 	logisticsAsBytes, _ := stub.GetState(args[0])
@@ -289,7 +286,7 @@ func (t *SmartContract) TransitLogistics(stub shim.ChaincodeStubInterface, args 
 	logisticobj.MAMChannel.ContainerID = args[1]
 	sideKey := GenerateRandomSeedString(81)
 	logisticobj.MAMChannel.SideKey = sideKey
-	timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
+	timestamp := args[3]
 	logisticobj.JourneyStartTime = timestamp
 
 	containerAsBytes, _ := stub.GetState(args[1])
@@ -371,7 +368,7 @@ func (t *SmartContract) InTransitLogistics(stub shim.ChaincodeStubInterface, arg
 
 func (t *SmartContract) DeliveryLogistics(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	if len(args) != 1 {
+	if len(args) != 2 {
 		return shim.Error("Invalid   no of arg for delivery function ")
 
 	}
@@ -384,7 +381,7 @@ func (t *SmartContract) DeliveryLogistics(stub shim.ChaincodeStubInterface, args
 		fmt.Println("we cannnot delivery the product which is not in In_Transit")
 		return shim.Error("we cannnot delivery the product which is not in In_Transit")
 	}
-	timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
+	timestamp := args[1]
 	logisticobj1.JourneyEndTime = timestamp
 	logisticobj1.Status = "Wait-Sign"
 	logisticsasbytes1, _ = json.Marshal(logisticobj1)

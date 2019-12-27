@@ -6,6 +6,8 @@ import (
     "log"
     "fmt"
     "encoding/json"
+    "strconv"
+    "time"
 
     "github.com/iotaledger/iota.go/address"
     "github.com/iotaledger/iota.go/mam/v1"
@@ -14,6 +16,10 @@ import (
     "github.com/iotaledger/iota.go/pow"
     "github.com/iotaledger/iota.go/trinary"
 )
+
+func Timestamp() string {
+    return strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
+}
 
 func GenerateRandomSeedString(length int) string {
     seed := ""
