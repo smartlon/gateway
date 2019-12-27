@@ -104,9 +104,12 @@ func  listener(action *chaincodeInvokeAction,chaincode string,wg *sync.WaitGroup
 			if err != nil {
 				fmt.Printf("fabric  failed to callback for SignLogistics :  %v\n", err.Error())
 			}
-			temperature = temperature + iot.Temperature + ","
+			if len(iot.Temperature) != 0 {
+				temperature = temperature + iot.Temperature + ","
+			}
 		}
 		temperature = strings.TrimSuffix(temperature,",")
+		fmt.Println("SignLogistics temperature: ",temperature)
 		argsArray = append(argsArray, Args{"SignLogistics",[]string{iotapayload.ContainerID,temperature}})
 		_, err = action.invoke(Config().ChannelID, chaincode, argsArray)
 		if err !=nil {
