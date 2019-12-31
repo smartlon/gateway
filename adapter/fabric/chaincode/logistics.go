@@ -38,6 +38,7 @@ type logisticstrans struct {
 	JourneyStartTime  string       `json:",JourneyStartTime"`
 	JourneyEndTime    string       `json:",JourneyEndTime"`
 	Status            string       `json:"Status"`
+	Count            string       `json:"Count"`
 	MAMChannel        MAMChannel   `json:"MAMChannel"`
 }
 
@@ -239,6 +240,8 @@ func (t *SmartContract) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.SignLogistics(stub, args)
 	case "QueryLogistics":
 		return t.QueryLogistics(stub, args)
+	case "QueryAllLogistics":
+		return t.QueryAllLogistics(stub, args)
 	}
 	fmt.Println("Function not found!")
 	return shim.Error("Recieved unknown function invocation!")
@@ -435,6 +438,7 @@ func (t *SmartContract) SignLogistics(stub shim.ChaincodeStubInterface, args []s
 		logisticobj1.Status = "Accepted  from Buyer"
 		container.Used = "false"
 	}
+	logisticobj1.Count = strconv.Itoa(count)
 	containerAsBytes, _ = json.Marshal(container)
 	stub.PutState(args[0], containerAsBytes)
 	logisticsasbytes1, _ = json.Marshal(logisticobj1)
@@ -451,5 +455,48 @@ func (t *SmartContract) QueryLogistics(stub shim.ChaincodeStubInterface, args []
 	}
 	logisticsasbytes1, _ := stub.GetState(args[0])
 	return shim.Success(logisticsasbytes1)
+}
+
+func (t *SmartContract) QueryAllLogistics(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+	startKey := "logistictran0"
+	endKey := "logistictran999"
+
+	resultsIterator, err := stub.GetStateByRange(startKey, endKey)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
+
+	// buffer is a JSON array containing QueryResults
+	var buffer bytes.Buffer
+	buffer.WriteString("[")
+
+	bArrayMemberAlreadyWritten := false
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
+		// Add comma before array members,suppress it for the first array member
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString("{\"Key\":")
+		buffer.WriteString("\"")
+		buffer.WriteString(queryResponse.Key)
+		buffer.WriteString("\"")
+
+		buffer.WriteString(", \"Record\":")
+		buffer.WriteString(string(queryResponse.Value))
+		buffer.WriteString("}")
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString("]")
+
+	fmt.Printf("- queryAllLogistics:\n%s\n", buffer.String())
+
+	return shim.Success(buffer.Bytes())
 }
 

@@ -83,6 +83,14 @@ func (lc *LogisticsController) QueryAllContainers(){
 	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
 	lc.ServeJSON()
 }
+func (lc *LogisticsController) QueryAllLogistics(){
+	queryAllLogisticsReqBytes := lc.Ctx.Input.RequestBody
+	code, message, ret := invokeController(queryAllLogisticsReqBytes)
+	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.ServeJSON()
+}
+
+
 func invokeController(invokeReqBytes []byte)(code, message, ret string){
 	var invokeReq sdk.Args
 	err := json.Unmarshal(invokeReqBytes,&invokeReq)
