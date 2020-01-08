@@ -86,7 +86,7 @@ func (lc *LogisticsController) QueryAllContainers(){
 	queryAllContainersReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(queryAllContainersReqBytes)
 	var qr []QueryResponse
-	err := json.Unmarshal([]byte(ret),qr)
+	err := json.Unmarshal([]byte(ret),&qr)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -102,7 +102,7 @@ func (lc *LogisticsController) QueryAllLogistics(){
 	queryAllLogisticsReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(queryAllLogisticsReqBytes)
 	var qr []QueryResponse
-	err := json.Unmarshal([]byte(ret),qr)
+	err := json.Unmarshal([]byte(ret),&qr)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
