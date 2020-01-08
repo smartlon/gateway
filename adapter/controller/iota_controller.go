@@ -47,7 +47,7 @@ func (lc *LogisticsController) MAMTransmit(){
 		ret = root
 	}
 
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.Data["json"] = map[string]interface{}{"code": code,"msg": message, "data": ret}
 	lc.ServeJSON()
 
 }
@@ -61,35 +61,37 @@ func (lc *LogisticsController) MAMReceive(){
 		fmt.Println(err.Error())
 	}
 	mamMessages := MAMReceive(mamReq.Root,"restricted",mamReq.SideKey)
-	var code,message string
+	var code int
+	var message string
 	var ret []string
 	if err != nil {
-		code = "201"
+		code = 201
 		message = "failed to receive mam tx"
 		ret = append(ret,err.Error())
 	}else {
-		code = "200"
+		code = 200
 		message = "successed to receive mam tx"
 		ret = mamMessages
 	}
-
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	count := len(ret)
+	lc.Data["json"] = map[string]interface{}{"code": code,"count": count,"msg": message, "data": ret}
 	lc.ServeJSON()
 }
 
 func (lc *LogisticsController) GetNodeInfo(){
 	nodeInfoBytes,err := NodeInfo()
-	var code,message,ret string
+	var code int
+	var message,ret string
 	if err != nil {
-		code = "201"
+		code = 201
 		message = "failed to get node info"
 		ret = err.Error()
 	}else {
-		code = "200"
+		code = 200
 		message = "successed to get node info"
 		ret = string(nodeInfoBytes)
 	}
 
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.Data["json"] = map[string]interface{}{"code": code,"msg": message, "data": ret}
 	lc.ServeJSON()
 }

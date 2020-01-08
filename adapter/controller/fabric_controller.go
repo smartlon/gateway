@@ -43,55 +43,80 @@ func (lc *LogisticsController) RequestLogistic(){
 	requestLogisticReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(requestLogisticReqBytes)
         
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.Data["json"] = map[string]interface{}{"code": code,"msg": message, "data": ret}
 	lc.ServeJSON()
 }
 func (lc *LogisticsController) TransitLogistics(){
 	transitLogisticReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(transitLogisticReqBytes)
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.Data["json"] = map[string]interface{}{"code": code,"msg": message, "data": ret}
 	lc.ServeJSON()
 }
 func (lc *LogisticsController) DeliveryLogistics(){
 	deliveryLogisticReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(deliveryLogisticReqBytes)
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.Data["json"] = map[string]interface{}{"code": code,"msg": message, "data": ret}
 	lc.ServeJSON()
 }
 func (lc *LogisticsController) QueryLogistics(){
 	queryLogisticReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(queryLogisticReqBytes)
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.Data["json"] = map[string]interface{}{"code": code,"msg": message, "data": ret}
 	lc.ServeJSON()
 }
 
 func (lc *LogisticsController) RecordContainer(){
 	recordContainerReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(recordContainerReqBytes)
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.Data["json"] = map[string]interface{}{"code": code,"msg": message, "data": ret}
 	lc.ServeJSON()
 }
 func (lc *LogisticsController) QueryContainer(){
 	queryContainerReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(queryContainerReqBytes)
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	lc.Data["json"] = map[string]interface{}{"code": code,"msg": message, "data": ret}
 	lc.ServeJSON()
 }
+type QueryResponse struct {
+	Key    string `json:"Key"`
+	Record    string `json:"Record"`
+}
+
 func (lc *LogisticsController) QueryAllContainers(){
 	queryAllContainersReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(queryAllContainersReqBytes)
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	var qr []QueryResponse
+	err := json.Unmarshal([]byte(ret),qr)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	count := len(qr)
+	var resp []string
+	for _,v := range qr {
+		resp = append(resp,v.Record)
+	}
+	lc.Data["json"] = map[string]interface{}{"code": code,"count": count,"msg": message, "data": resp}
 	lc.ServeJSON()
 }
 func (lc *LogisticsController) QueryAllLogistics(){
 	queryAllLogisticsReqBytes := lc.Ctx.Input.RequestBody
 	code, message, ret := invokeController(queryAllLogisticsReqBytes)
-	lc.Data["json"] = map[string]interface{}{"code": code,"message": message, "result": ret}
+	var qr []QueryResponse
+	err := json.Unmarshal([]byte(ret),qr)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	count := len(qr)
+	var resp []string
+	for _,v := range qr {
+		resp = append(resp,v.Record)
+	}
+	lc.Data["json"] = map[string]interface{}{"code": code,"count": count,"msg": message, "data": resp}
 	lc.ServeJSON()
 }
 
 
-func invokeController(invokeReqBytes []byte)(code, message, ret string){
+func invokeController(invokeReqBytes []byte)(code int, message, ret string){
 	var invokeReq sdk.Args
 	err := json.Unmarshal(invokeReqBytes,&invokeReq)
 	if err != nil {
@@ -121,10 +146,10 @@ func invokeController(invokeReqBytes []byte)(code, message, ret string){
 	if err != nil {
 		log.Error(err)
 		message = err.Error()
-		code = "201"
+		code = 201
 	}else {
 		message = "invoke " +invokeReq.Func+ " success"
-		code = "200"
+		code = 200
 	}
 	return
 }

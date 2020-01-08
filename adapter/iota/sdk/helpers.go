@@ -55,7 +55,7 @@ func GetTransmitter(t *mam.Transmitter, seed string, mode string, sideKey string
             return t
         default:
             //seed := GenerateRandomSeedString(81)
-            transmitter := mam.NewTransmitter(api, seed, uint64(mwm), consts.SecurityLevelMedium)
+            transmitter := mam.NewTransmitter(api, seed, uint64(mwm), consts.SecurityLevelLow)
             if err := transmitter.SetMode(cm, PadSideKey(sideKey)); err != nil {
                 log.Fatal(err)
             }
