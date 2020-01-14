@@ -21,7 +21,7 @@ func main()  {
 	var w sync.WaitGroup
 	errChannel := make(chan error, 1)
 	startLog(errChannel)
-	startEtcd(&w)
+	//startEtcd(&w)
 	startAdapterPorts(errChannel, &w)
 	w.Wait()
 	startConsensus(&w)
