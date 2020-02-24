@@ -3,11 +3,9 @@ package types
 import (
 	"bytes"
 	"encoding/binary"
-	"strconv"
 	"strings"
 
 	"github.com/QOSGroup/cassini/log"
-	"github.com/QOSGroup/qbase/qcp"
 )
 
 // BytesInt64 Int64 转换
@@ -29,30 +27,6 @@ func Int64Bytes(in int64) []byte {
 	return ret.Bytes()
 }
 
-// ParseHeight parse height in string to int64
-func ParseHeight(height string) (int64, error) {
-	return strconv.ParseInt(height, 10, 64)
-}
-
-// ParseSequence parse sequence in string to int64
-func ParseSequence(seq string) (int64, error) {
-	return strconv.ParseInt(seq, 10, 64)
-}
-
-// Key4OutChainSequence 输出队列交易序号查询接口key值组装方法
-func Key4OutChainSequence(outChain string) string {
-	return string(qcp.BuildOutSequenceKey(outChain))
-}
-
-// Key4InChainSequence 输出队列交易序号查询接口key值组装方法
-func Key4InChainSequence(chain string) string {
-	return string(qcp.BuildInSequenceKey(chain))
-}
-
-// Key4OutChainTx 输出队列交易查询接口key值组装方法
-func Key4OutChainTx(outChain string, sequence int64) string {
-	return string(qcp.BuildOutSequenceTxKey(outChain, sequence))
-}
 
 // ParseAddrs parse protocol and addrs
 func ParseAddrs(address string) (protocol string, addrs []string) {

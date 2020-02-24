@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/QOSGroup/cassini/log"
-	exporter "github.com/QOSGroup/cassini/prometheus"
+	"github.com/smartlon/gateway/log"
+	//exporter "github.com/QOSGroup/cassini/prometheus"
 	"github.com/nats-io/go-nats"
 )
 
@@ -17,7 +17,7 @@ type NatsQueue struct {
 
 // Init message queue
 func (q *NatsQueue) Init() error {
-	exporter.Set(exporter.KeyQueueSize, 0, "nats")
+	//exporter.Set(exporter.KeyQueueSize, 0, "nats")
 	return nil
 }
 

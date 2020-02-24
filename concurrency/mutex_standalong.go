@@ -7,43 +7,44 @@ import (
 
 // NewStandaloneMutex new a mutex for a standalone implementation.
 func NewStandaloneMutex(name string) *StandaloneMutex {
+	iota := make(map[string]string)
 	return &StandaloneMutex{
 		chainID:  name,
-		sequence: 1}
+		iotaPayload: iota}
 }
 
 // StandaloneMutex implements a standalone version for single process.
 type StandaloneMutex struct {
 	chainID  string
-	sequence int64
+	iotaPayload map[string]string
 	mux      sync.Mutex
 }
 
 // Lock get lock
-func (s *StandaloneMutex) Lock(sequence int64) (int64, error) {
+func (s *StandaloneMutex) Lock(address string) (string, error) {
 	s.mux.Lock()
-	if sequence != s.sequence {
+	iotaPayload,ok := s.iotaPayload[address]
+	if !ok {
 		s.mux.Unlock()
-		return s.sequence, fmt.Errorf("Wrong sequence(%d): lock sequence(%d)",
-			sequence, s.sequence)
+		return "", fmt.Errorf("Wrong iotaPayload about address %s",address)
 	}
-	return s.sequence, nil
+	return iotaPayload, nil
 }
 
 // Unlock unlock the lock
-func (s *StandaloneMutex) Unlock(success bool) error {
+func (s *StandaloneMutex) Unlock(success bool,address string) error {
 	if success {
-		s.sequence++
+		delete(s.iotaPayload, address)
 	}
 	s.mux.Unlock()
 	return nil
 }
 
 // Update update the sequence in lock
-func (s *StandaloneMutex) Update(sequence int64) error {
+func (s *StandaloneMutex) Update(address string,iota string) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
-	s.sequence = sequence
+	s.iotaPayload[address] = iota
 	return nil
 }
 

@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/QOSGroup/cassini/log"
+	"github.com/smartlon/gateway/log"
 )
 
 // ParseUrls parse URLs

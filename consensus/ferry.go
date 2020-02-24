@@ -13,13 +13,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/QOSGroup/cassini/adapter/ports"
-	cmn "github.com/QOSGroup/cassini/common"
-	"github.com/QOSGroup/cassini/concurrency"
-	"github.com/QOSGroup/cassini/config"
-	"github.com/QOSGroup/cassini/log"
-	exporter "github.com/QOSGroup/cassini/prometheus"
-	"github.com/QOSGroup/cassini/restclient"
+	"github.com/smartlon/gateway/adapter/ports"
+	cmn "github.com/smartlon/gateway/common"
+	"github.com/smartlon/gateway/concurrency"
+	"github.com/smartlon/gateway/config"
+	"github.com/smartlon/gateway/log"
 )
 
 // Ferry Comsumer tx message and handle(consensus, broadcast...) it.
@@ -215,7 +213,7 @@ EndGet:
 		qcp, err = f.getTxQcpFromNode(from, to, hash, node, sequence)
 
 		if err != nil || qcp == nil {
-			if !strings.Contains(err.Error(), restclient.ERR_emptyqcp) {
+			if !strings.Contains(err.Error(), ERR_emptyqcp) {
 				log.Warnf("get transaction from %s failed,%s", node, err.Error())
 			} else {
 				bempty = true
@@ -231,7 +229,7 @@ EndGet:
 
 	if !success {
 		if bempty {
-			return nil, errors.New(restclient.ERR_emptyqcp)
+			return nil, errors.New(ERR_emptyqcp)
 		}
 		return nil, errors.New("getTxQcp failed")
 	}
@@ -346,7 +344,7 @@ func (f *Ferry) postTxQcp(to string, qcp *txs.TxQcp) (err error) {
 			if err != nil {
 				log.Errorf("post TxQcp error: %v", err)
 			} else {
-				exporter.Set(exporter.KeyTxsPerSecond, 1)
+				//exporter.Set(exporter.KeyTxsPerSecond, 1)
 				return nil
 			}
 		}

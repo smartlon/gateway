@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/QOSGroup/cassini/log"
-	"github.com/QOSGroup/cassini/types"
 	v3 "github.com/coreos/etcd/clientv3"
 	v3c "github.com/coreos/etcd/clientv3/concurrency"
 )
@@ -44,45 +43,42 @@ type EtcdMutex struct {
 	client   *v3.Client
 	session  *v3c.Session
 	mutex    *v3c.Mutex
-	sequence int64
 	locked   bool
 }
 
 // Lock get lock
-func (e *EtcdMutex) Lock(sequence int64) (int64, error) {
+func (e *EtcdMutex)Lock(address string) (string, error) {
 	e.mutex = v3c.NewMutex(e.session, e.chainID)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second) //设置2s超时
 	defer cancel()
 
 	var err error
 	err = e.mutex.Lock(ctx)
-	seq := e.get()
 	if err != nil {
 		log.Errorf("Lock error: %s", err)
-		return seq, err
+		return "", err
 	}
+	iotaPayload,err := e.get(address)
+
 	e.locked = true
 
-	if sequence != seq {
+	if err != nil {
 		defer func() {
-			err := e.Unlock(false)
+			err := e.Unlock(false,address)
 			if err != nil {
 				log.Error("Unlock error: ", err)
 			}
 		}()
-		err = fmt.Errorf("Wrong sequence(%d), current sequence(%d) in lock",
-			sequence, seq)
-		log.Error(err) 
-		return seq, err
+		log.Error(err)
+		return "", err
 	}
-	e.sequence = sequence
 
-	log.Debugf("Get lock success, %s: %d", e.chainID, e.sequence)
-	return e.sequence, nil
+	log.Debugf("Get lock success, %s: %s", e.chainID, address)
+	return iotaPayload, nil
 }
 
 // Update update the lock
-func (e *EtcdMutex) Update(sequence int64) error {
+func (e *EtcdMutex) Update(address string,iota string) error {
 	mux := v3c.NewMutex(e.session, e.chainID)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second) //设置2s超时
 	defer cancel()
@@ -90,34 +86,29 @@ func (e *EtcdMutex) Update(sequence int64) error {
 	var err error
 	err = mux.Lock(ctx)
 	if err != nil {
-		log.Errorf("Update lock sequence(%d) error: %s", sequence, err)
+		log.Errorf("Update lock address(%s) error: %s", address, err)
 		return err
 	}
 	defer func() {
 		mux.Unlock(ctx)
 	}()
-	seq := e.get()
-	if sequence > seq {
-		err = e.put(sequence)
-		if err != nil {
-			log.Errorf("Update sequence(%d), current sequence(%d) in lock, error: %s",
-				sequence, seq, err)
-			return err
-		}
+	err = e.put(address,iota)
+	if err != nil {
+		log.Errorf("Update address(%s), iota: %s, error: %s",
+			address, iota, err)
+		return err
 	}
-	e.sequence = sequence
-	log.Debugf("Upadte lock success, %s: %d", e.chainID, e.sequence)
+	log.Debugf("Upadte lock success, %s: %s", e.chainID, address)
 	return nil
 }
 
 // Unlock unlock the lock
-func (e *EtcdMutex) Unlock(success bool) (err error) {
+func (e *EtcdMutex) Unlock(success bool,address string) (err error) {
 	if !e.locked {
 		return nil
 	}
 	if success {
-		e.sequence++
-		err = e.put(e.sequence)
+		err = e.delete(address)
 		if err != nil {
 			log.Errorf("Put key value error when unlock: ", err)
 		}
@@ -130,8 +121,51 @@ func (e *EtcdMutex) Unlock(success bool) (err error) {
 		return
 	}
 	e.locked = false
-	log.Debugf("Unlock success, %s: %d", e.chainID, e.sequence)
+	log.Debugf("Unlock success, %s: %s", e.chainID, address)
 	return
+}
+
+
+func (e *EtcdMutex) get(address string) (string,error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second) //设置2s超时
+	defer cancel()
+	// var resp *v3.GetResponse
+	key := generateKey(e.chainID,address)
+	resp, err := e.client.Get(ctx, key)
+	if err != nil {
+		log.Error("Get key value error: ", err)
+		return "",err
+	}
+	for _, kv := range resp.Kvs {
+		if strings.EqualFold(string(kv.Key), key ) {
+			return string(kv.Value),nil
+		}
+	}
+	return "",fmt.Errorf("iotaPayload is not in the etcd ,address %s",address)
+}
+
+func (e *EtcdMutex) put(address string, iotaPayload string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second) //设置2s超时
+	defer cancel()
+	// var resp *v3.PutResponse
+	key := generateKey(e.chainID,address)
+	_, err := e.client.Put(ctx, key, iotaPayload)
+	if err != nil {
+		log.Error("Put key value error: ", err)
+	}
+	return err
+}
+
+func (e *EtcdMutex) delete(address string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second) //设置2s超时
+	defer cancel()
+	// var resp *v3.PutResponse
+	key := generateKey(e.chainID,address)
+	_, err := e.client.Delete(ctx, key)
+	if err != nil {
+		log.Error("delete key value error: ", err)
+	}
+	return err
 }
 
 // Close close the lock
@@ -140,36 +174,6 @@ func (e *EtcdMutex) Close() error {
 	return e.client.Close()
 }
 
-func (e *EtcdMutex) get() int64 {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second) //设置2s超时
-	defer cancel()
-	// var resp *v3.GetResponse
-	resp, err := e.client.Get(ctx, e.chainID)
-	if err != nil {
-		log.Error("Get key value error: ", err)
-		return -1
-	}
-	for _, kv := range resp.Kvs {
-		if strings.EqualFold(string(kv.Key), e.chainID) {
-			var seq int64
-			seq, err = types.ParseSequence(string(kv.Value))
-			if err != nil {
-				log.Error("Parse key value error: ", err)
-				return -1
-			}
-			return seq
-		}
-	}
-	return -1
-}
-
-func (e *EtcdMutex) put(sequence int64) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second) //设置2s超时
-	defer cancel()
-	// var resp *v3.PutResponse
-	_, err := e.client.Put(ctx, e.chainID, fmt.Sprintf("%d", sequence))
-	if err != nil {
-		log.Error("Put key value error: ", err)
-	}
-	return err
+func generateKey(chainid string, address string) string {
+	return fmt.Sprintf("%s/%s",chainid,address)
 }

@@ -4,8 +4,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/QOSGroup/cassini/commands"
-	exporter "github.com/QOSGroup/cassini/prometheus"
+	//"github.com/QOSGroup/cassini/commands"
 	"github.com/spf13/viper"
 )
 
@@ -27,7 +26,7 @@ func getQueue(subject string) Queue {
 	var queue Queue
 	q, loaded := queues.Load(subject)
 	if !loaded {
-		conf := viper.GetString(commands.FlagQueue)
+		conf := viper.GetString("queue")
 		queue = newQueue(subject, conf)
 		q, loaded = queues.LoadOrStore(subject, queue)
 	}
@@ -90,7 +89,7 @@ func (q *LocalQueue) Init() error {
 	queueSize := 100
 	q.ch = make(chan []byte, queueSize)
 	q.isInitialized = true
-	exporter.Set(exporter.KeyQueueSize, float64(queueSize), "local")
+	//exporter.Set(exporter.KeyQueueSize, float64(queueSize), "local")
 	return nil
 }
 

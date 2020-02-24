@@ -5,9 +5,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/QOSGroup/cassini/common"
-	"github.com/QOSGroup/cassini/log"
-	"github.com/QOSGroup/cassini/types"
+	"github.com/smartlon/gateway/common"
+	"github.com/smartlon/gateway/log"
+	"github.com/smartlon/gateway/types"
 	"github.com/pkg/errors"
 )
 

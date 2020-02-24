@@ -7,14 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/QOSGroup/cassini/config"
-	"github.com/QOSGroup/cassini/log"
-	"github.com/QOSGroup/cassini/queue"
-	"github.com/QOSGroup/cassini/types"
-	amino "github.com/tendermint/go-amino"
+	"github.com/smartlon/gateway/config"
+	"github.com/smartlon/gateway/log"
+	"github.com/smartlon/gateway/queue"
+	"github.com/smartlon/gateway/types"
+	"github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/crypto"
 
-	"github.com/QOSGroup/cassini/restclient"
 	"github.com/tendermint/tendermint/libs/common"
 )
 
@@ -24,6 +23,7 @@ const (
 	fail consResult = iota
 	success
 	empty //交易还没产生 共识失败
+    ERR_emptyqcp = "empty qcp transaction"
 )
 
 // ConsEngine Consensus engine
@@ -263,7 +263,7 @@ func (c *ConsEngine) conSequence() consResult {
 		qcp, err := c.F.queryTxQcpFromNode(c.from, c.to, node, c.sequence) // be (c.to, node, c.sequence)
 
 		if qcp == nil {
-			if err != nil && strings.Contains(err.Error(), restclient.ERR_emptyqcp) {
+			if err != nil && strings.Contains(err.Error(), ERR_emptyqcp) {
 				bempty = true //交易还没产生
 			}
 			continue

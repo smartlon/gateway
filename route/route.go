@@ -1,12 +1,12 @@
 package route
 
 import (
+	"encoding/json"
 	"errors"
 
-	"github.com/QOSGroup/cassini/log"
-	"github.com/QOSGroup/cassini/queue"
-	"github.com/QOSGroup/cassini/types"
-	amino "github.com/tendermint/go-amino"
+	"github.com/smartlon/gateway/log"
+	"github.com/smartlon/gateway/queue"
+	"github.com/smartlon/gateway/types"
 )
 
 //type route struct{}
@@ -18,40 +18,24 @@ func Event2queue(nats string, event *types.Event) (subject string, err error) {
 
 		return "", errors.New("event is nil")
 	}
-	// log.Infof("event from: %s, to: %s, nodes: %s, sequence: %d, hash: %v",
-	// 	event.From, event.To, event.NodeAddress, event.Sequence, event.HashBytes)
-	if event.HashBytes == nil || event.From == "" || event.To == "" || event.NodeAddress == "" {
+	if event.From == "" || event.To == "" || event.NodeAddress == "" {
 		return "", errors.New("event data is empty")
 	}
 
-	data, err := amino.MarshalBinaryLengthPrefixed(*event)
+	data, err := json.Marshal(event)
 	if err != nil {
 		return "", err
 	}
 
 	subject = event.From + "2" + event.To
 
-	// producer := mq.NATSProducer{ServerUrls: nats, Subject: subject}
-
-	// np, err := producer.Connect() //TODO don't connect every time
-
-	// if err != nil {
-
-	// 	return "", errors.New("couldn't connect to msg server")
-	// }
-
-	// defer np.Close()
-
-	// if err := producer.Produce(np, eventbytes); err != nil {
-	// 	return "", err
-	// }
 	producer, err := queue.NewProducer(subject)
 	if err != nil {
 		return "", err
 	}
 	producer.Produce(data)
 
-	log.Infof("routed event from[%s] sequence[#%d] to subject [%s] ", event.NodeAddress, event.Sequence, subject)
+	log.Infof("routed event from[%s]  to subject [%s] ", event.NodeAddress,  subject)
 
 	return subject, nil
 }

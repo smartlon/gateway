@@ -4,7 +4,7 @@
 package concurrency
 
 import (
-
+	"github.com/smartlon/gateway/types"
 )
 
 // Mutex distributed lock interface
@@ -15,15 +15,15 @@ type Mutex interface {
 	// Whether successful or not,
 	// the current sequence saved in the distributed lock is returned.
 	// Negative sequence(<0) are returned unless there are some unknown exceptions.
-	Lock(sequence int64) (int64, error)
+	Lock(address string) (string, error)
 
 	// Update update the sequence saved in the distributed lock.
-	Update(sequence int64) error
+	Update(address string,iota string) error
 
 	// Unlock after successfully acquiring the lock, the lock needs to be unlocked.
 	//
 	// If it returned an error, indicates that the call failed.
-	Unlock(success bool) error
+	Unlock(success bool,address string) error
 
 	// Close close the lock
 	Close() error
