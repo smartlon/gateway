@@ -11,16 +11,24 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/event"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 	"github.com/pkg/errors"
-	"github.com/smartlon/gateway/adapter/ports"
-	"github.com/smartlon/gateway/adapter/ports/fabric"
 	"github.com/smartlon/gateway/log"
 	"github.com/smartlon/gateway/types"
 	"time"
 )
 
+type ChaincodeEventAction struct {
+	Action
+	numInvoked uint32
+	done       chan bool
+}
 
+func NewChaincodeEventAction() (*ChaincodeEventAction, error) {
+	action := &ChaincodeEventAction{done: make(chan bool)}
+	err := action.Initialize()
+	return action, err
+}
 
-func  Listener(chaincodeID,peerUrl string,listener ports.EventsListener,a *fabric.FabAdaptor) {
+func  Listener(chaincodeID,peerUrl string) {
 	if chaincodeID == "" {
 		err := fmt.Errorf("must specify the chaincode ID")
 		panic(err)
@@ -129,9 +137,9 @@ func  Listener(chaincodeID,peerUrl string,listener ports.EventsListener,a *fabri
 		event.IotaPayload=iotapayload
 		event.From = "FABRIC"
 		event.To = "IOTA"
-		event.NodeAddress = ports.GetAdapterKey(a)
+		//event.NodeAddress = ports.GetAdapterKey(a)
 
-		listener(event,a)
+		//listener(event,a)
 	}
 }
 
