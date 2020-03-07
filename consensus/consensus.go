@@ -115,7 +115,7 @@ func ferry(from,to string, tx types.Event) {
 		}
 		fabReturn, err := fromAd.SubmitTx(string(argsBytes))
 		if err !=nil {
-			log.Error("fabric failed to callback for InTransitLogistics: %s\n", err.Error())
+			log.Errorf("fabric failed to callback for InTransitLogistics: %s\n", err.Error())
 		}
 		log.Info(fabReturn)
 	case "FABRICDELEVERY":
