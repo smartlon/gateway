@@ -8,7 +8,6 @@ import (
 	"github.com/smartlon/gateway/adapter/ports/fabric/sdk"
 	"github.com/smartlon/gateway/log"
 	"github.com/smartlon/gateway/types"
-	"time"
 )
 
 func init() {
@@ -161,8 +160,8 @@ func (a *FabAdaptor) Subscribe(listener EventsListener) {
 				//if err !=nil {
 				//	fmt.Printf("fabric  failed to callback for SignLogistics :  %v\n", err.Error())
 				//}
-			case <-time.After(time.Second * 3):
-				fmt.Println("Exit while waiting for chaincode event")
+			//case <-time.After(time.Second * 3):
+			//	fmt.Println("Exit while waiting for chaincode event")
 			}
 			event.IotaPayload=iotapayload
 			event.From = "FABRIC"
