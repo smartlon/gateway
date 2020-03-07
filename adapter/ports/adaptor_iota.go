@@ -67,7 +67,7 @@ func (a *IOTAAdaptor) Subscribe(listener EventsListener) {
 				//fmt.Printf("tx: trytes received. Skip.\n")
 				continue
 			}
-			//if strings.Contains(tx.Tag, sdk.ChainTag)  {
+			if strings.Contains(tx.Tag, sdk.ChainTag)  {
 				log.Infof("received tx: %s, tx tag %s\n",tx,tx.Tag)
 				gatewayEventDataTx:= types.GatewayEventDataTx{
 					a.GetChainName(),
@@ -81,7 +81,7 @@ func (a *IOTAAdaptor) Subscribe(listener EventsListener) {
 					gatewayEventDataTx,
 				}
 				listener(event,a)
-			//}
+			}
 
 		}
 	}()
