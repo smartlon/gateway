@@ -97,6 +97,7 @@ func ferry(from,to string, tx types.Event) {
 			log.Error(err)
 			panic(err)
 		}
+		log.Infof("func: %s, result %s",tx.Func,string(transmitReturnBytes))
 		var transmitReturn iotaSDK.TransmitResult
 		err = json.Unmarshal([]byte(transmitReturnBytes),&transmitReturn)
 		if err != nil {
@@ -114,7 +115,7 @@ func ferry(from,to string, tx types.Event) {
 		}
 		fabReturn, err := fromAd.SubmitTx(string(argsBytes))
 		if err !=nil {
-			log.Error("fabric  failed to callback for InTransitLogistics :  %v\n", err.Error())
+			log.Error("fabric failed to callback for InTransitLogistics: %s\n", err.Error())
 		}
 		log.Info(fabReturn)
 	case "FABRICDELEVERY":
