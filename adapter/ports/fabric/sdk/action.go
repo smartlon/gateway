@@ -229,10 +229,30 @@ func (action *Action) ChannelProvider() (context.ChannelProvider, error) {
 	}
 	return channelProvider, nil
 }
+func (action *Action) EventChannelProvider(peerUrl string ) (context.ChannelProvider, error) {
+	channelID := action.ChannelID
+	orgId,err := action.OrgOfPeer(peerUrl)
+	if err != nil {
+		return nil, err
+	}
+	user, err := action.OrgAdminUser(orgId)
+	if err != nil {
+		return nil, err
+	}
+	log.Debugf("creating channel provider for user [%s] in org [%s]...", user.Identifier().ID, user.Identifier().MSPID)
+	clientContext, err := action.context(user)
+	if err != nil {
+		return nil, errors.Errorf("error getting client context for user [%s,%s]: %v", user.Identifier().MSPID, user.Identifier().ID, err)
+	}
+	channelProvider := func() (context.Channel, error) {
+		return contextImpl.NewChannel(clientContext, channelID)
+	}
+	return channelProvider, nil
+}
 
 // EventClient returns the event hub.
-func (action *Action) EventClient(opts ...event.ClientOption) (*event.Client, error) {
-	channelProvider, err := action.ChannelProvider()
+func (action *Action) EventClient(peerUrl string,opts ...event.ClientOption) (*event.Client, error) {
+	channelProvider, err := action.EventChannelProvider(peerUrl)
 	if err != nil {
 		return nil, errors.Errorf("error creating channel provider: %v", err)
 	}

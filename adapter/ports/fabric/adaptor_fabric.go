@@ -3,11 +3,7 @@ package fabric
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/QOSGroup/qbase/txs"
 	"github.com/smartlon/gateway/adapter/ports/fabric/sdk"
-	"net/http"
-	"strconv"
-
 	"github.com/smartlon/gateway/adapter/ports"
 	"github.com/smartlon/gateway/log"
 )
@@ -64,31 +60,22 @@ func (a *FabAdaptor) Stop() error {
 // Subscribe events from fabric chain
 func (a *FabAdaptor) Subscribe(listener ports.EventsListener) {
 	log.Infof("event subscribe: %s", ports.GetAdapterKey(a))
+	peerUrl := fmt.Sprintf("%s:%d",a.GetIP(),a.GetPort())
+	go sdk.Listener(ChaincodeID,peerUrl,listener,a)
 }
 
 // SubmitTx submit Tx to hyperledger fabric chain
 func (a *FabAdaptor) SubmitTx(tx string) (string, error) {
-
+	var argsArray []sdk.Args
+	err := json.Unmarshal([]byte(tx),&argsArray)
+	if err != nil {
+		return "",err
+	}
+	return sdk.ChaincodeInvoke(ChaincodeID,argsArray)
 }
 
 func (a *FabAdaptor) ObtainTx(tx string) (string, error) {
-	log.Infof("ObtainTx: %s(%s), %d", a.GetChainName(), chainID, sequence)
-	var as []string
-	as = append(as, "transaction", "sequence", strconv.FormatInt(sequence, 10))
-	args := sdk.Args{
-		Func: "query", Args: as}
-	var argsArray []sdk.Args
-	argsArray = append(argsArray, args)
-	ret, err := sdk.ChaincodeQuery(ChaincodeID, argsArray)
-	if err != nil {
-		log.Errorf("ObtainTx %s(%s), %d error: %v",
-			a.GetChainName(), chainID, sequence, err)
-		return nil, err
-	}
-	log.Info("query transaction result: ", ret)
-	tx := msgtx.NewTxQcp(fmt.Sprintf("%s(%s)", a.GetChainName(), chainID),
-		a.GetChainName(), chainID, int64(1), int64(sequence), ret)
-	return tx, nil
+	return "",nil
 }
 
 

@@ -42,18 +42,14 @@ func main()  {
 	startAdapterPorts(errChannel, &w)
 	w.Wait()
 	startConsensus(&w)
-
-	go func() {
-		w.Wait()
-		log.Info("gateway started ")
-	}()
-	return
+	w.Wait()
+	log.Info("gateway started ")
 }
 
 func initConfig() error {
 	// init config
 	defaultHome := os.ExpandEnv("$HOME/.gateway")
-	defaultConfig := filepath.Join(defaultHome, "config/gateway.yaml")
+	defaultConfig := filepath.Join(defaultHome, "config/gateway.yml")
 	//defaultLog := filepath.Join(defaultHome, "config/log.conf")
 
 	log.Debug("home: ", defaultHome)
@@ -214,6 +210,6 @@ func startConsensus(w *sync.WaitGroup) {
 			log.Flush()
 			os.Exit(1)
 		}
-		w.Done()
+		//w.Done()
 	}()
 }

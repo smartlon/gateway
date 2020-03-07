@@ -5,8 +5,7 @@ import (
 	"fmt"
 
 	"github.com/smartlon/gateway/log"
-	//exporter "github.com/QOSGroup/cassini/prometheus"
-	"github.com/nats-io/go-nats"
+	"github.com/nats-io/nats.go"
 )
 
 // NatsQueue wraps nats client as a message queue service

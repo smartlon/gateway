@@ -6,21 +6,21 @@
 #     nats://192.168.1.100:4222,192.168.1.101:4222,192.168.1.102:4222
 # default:
 #	    local
-queue: nats://127.0.0.1:4222
+queue: nats://202.117.43.212:4222
 
 prikey: qhip/qi69q0rFQI5GWkyQljshWIWOt9OE464Pg29Y7YPNSHo39E9UzuQGqra7YYYYYYYYY/V/XXXXXXXXX/vgQ==
 
-consensus: true
+consensus: false
 
 eventWaitMillitime: 2000
 
-useEtcd: true
+useEtcd: false
 
 lock: etcd://127.0.0.1:2379
 
 lockTTL: 5000
 
-embedEtcd: true
+embedEtcd: false
 
 etcd:
   name:           dev-cassini
@@ -30,10 +30,10 @@ etcd:
   cluster:        dev-cassini=http://127.0.0.1:2380
 
 qscs:
-  - name: fromChain
-    type: qstars
-    nodes: 127.0.0.1:26657
-  - name: toChain
-    type: qos
-    nodes: 127.0.0.1:27657
+  - name: supply-fabric
+    type: fabric
+    nodes: 202.117.43.212:10051
+  - name: supply-iota
+    type: iota
+    nodes: 202.117.43.212:14265
 
