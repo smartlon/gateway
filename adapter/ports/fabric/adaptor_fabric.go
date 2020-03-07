@@ -8,16 +8,16 @@ import (
 	"github.com/smartlon/gateway/log"
 )
 
-func init() {
-	builder := func(config ports.AdapterConfig) (ports.AdapterService, error) {
-		a := &FabAdaptor{config: &config}
-		a.Start()
-		a.Sync()
-		//a.Subscribe(config.Listener)
-		return a, nil
-	}
-	ports.GetPortsIncetance().RegisterBuilder("fabric", builder)
-}
+//func init() {
+//	builder := func(config ports.AdapterConfig) (ports.AdapterService, error) {
+//		a := &FabAdaptor{config: &config}
+//		a.Start()
+//		a.Sync()
+//		//a.Subscribe(config.Listener)
+//		return a, nil
+//	}
+//	ports.GetPortsIncetance().RegisterBuilder("fabric", builder)
+//}
 
 const (
 

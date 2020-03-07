@@ -3,6 +3,8 @@ package ports
 import (
 	"errors"
 	"fmt"
+	"github.com/smartlon/gateway/adapter/ports/fabric"
+	"github.com/smartlon/gateway/adapter/ports/iota"
 	"strings"
 	"sync"
 
@@ -11,6 +13,24 @@ import (
 	"github.com/smartlon/gateway/route"
 	"github.com/smartlon/gateway/types"
 )
+
+func init() {
+	builderIOTA := func(config AdapterConfig) (AdapterService, error) {
+		a := &iota.IOTAAdaptor{ &config}
+		a.Start()
+		a.Sync()
+		return a, nil
+	}
+	builderFabric := func(config AdapterConfig) (AdapterService, error) {
+		a := &fabric.FabAdaptor{ &config}
+		a.Start()
+		a.Sync()
+		//a.Subscribe(config.Listener)
+		return a, nil
+	}
+	GetPortsIncetance().RegisterBuilder("fabric", builderFabric)
+	GetPortsIncetance().RegisterBuilder("iota", builderIOTA)
+}
 
 // Builder Create an AdapterService for the specified chain
 type Builder func(config AdapterConfig) (AdapterService, error)
