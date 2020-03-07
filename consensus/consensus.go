@@ -125,7 +125,7 @@ func ferry(from,to string, tx types.Event) {
 			"",
 			"",
 			timestamp,
-			"start",
+			"end",
 		}
 		iotdatabytes,err := json.Marshal(iotdata)
 		if err != nil {
