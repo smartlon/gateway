@@ -10,7 +10,7 @@ import (
 	"github.com/smartlon/gateway/queue"
 	"github.com/smartlon/gateway/types"
 	iotaSDK "github.com/smartlon/gateway/adapter/ports/iota/sdk"
-	fabricSDK "github.com/smartlon/supplynetwork/fabric/sdk"
+	fabricSDK "github.com/smartlon/gateway/adapter/ports/fabric/sdk"
 	"strconv"
 	"time"
 )
