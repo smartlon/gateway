@@ -5,20 +5,16 @@ import (
 	"fmt"
 	"github.com/smartlon/gateway/adapter/ports/fabric"
 	"github.com/smartlon/gateway/adapter/ports/iota"
-	"strings"
-	"sync"
-
 	"github.com/smartlon/gateway/config"
 	"github.com/smartlon/gateway/log"
 	"github.com/smartlon/gateway/route"
 	"github.com/smartlon/gateway/types"
+	"strings"
 )
 
 func init() {
-	once.Do(func() {
-		ports = &defaultPorts{}
-		ports.Init()
-	})
+	ports = &defaultPorts{}
+	ports.Init()
 	builderIOTA := func(config AdapterConfig) (AdapterService, error) {
 		a := &iota.IOTAAdaptor{ &config}
 		a.Start()
@@ -54,7 +50,7 @@ type defaultPorts struct {
 	builders map[string]Builder
 }
 
-var once sync.Once
+//var once sync.Once
 var ports Ports
 
 // GetAdapters Get all Adapters for the specified chain
