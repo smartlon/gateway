@@ -35,7 +35,7 @@ func GenerateRandomSeedString(length int) string {
     return seed
 }
 
-func PadSideKey(sideKey string) string {
+func PadSideKey(sideKey string) (string, error) {
     return trinary.Pad(sideKey, 81)
 }
 
@@ -56,7 +56,8 @@ func GetTransmitter(t *mam.Transmitter, seed string, mode string, sideKey string
         default:
             //seed := GenerateRandomSeedString(81)
             transmitter := mam.NewTransmitter(api, seed, uint64(mwm), consts.SecurityLevelLow)
-            if err := transmitter.SetMode(cm, PadSideKey(sideKey)); err != nil {
+            sidekey,_ := PadSideKey(sideKey)
+            if err := transmitter.SetMode(cm, sidekey); err != nil {
                 log.Fatal(err)
             }
             return transmitter
