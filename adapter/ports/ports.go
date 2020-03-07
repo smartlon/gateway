@@ -3,34 +3,15 @@ package ports
 import (
 	"errors"
 	"fmt"
-	"github.com/smartlon/gateway/adapter/ports/fabric"
-	"github.com/smartlon/gateway/adapter/ports/iota"
+	"strings"
+	"sync"
+	_"github.com/smartlon/gateway/adapter/ports/fabric"
+	_"github.com/smartlon/gateway/adapter/ports/iota"
 	"github.com/smartlon/gateway/config"
 	"github.com/smartlon/gateway/log"
 	"github.com/smartlon/gateway/route"
 	"github.com/smartlon/gateway/types"
-	"strings"
 )
-
-func init() {
-	ports = &defaultPorts{}
-	ports.Init()
-	builderIOTA := func(config AdapterConfig) (AdapterService, error) {
-		a := &iota.IOTAAdaptor{ &config}
-		a.Start()
-		a.Sync()
-		return a, nil
-	}
-	builderFabric := func(config AdapterConfig) (AdapterService, error) {
-		a := &fabric.FabAdaptor{ &config}
-		a.Start()
-		a.Sync()
-		//a.Subscribe(config.Listener)
-		return a, nil
-	}
-	GetPortsIncetance().RegisterBuilder("fabric", builderFabric)
-	GetPortsIncetance().RegisterBuilder("iota", builderIOTA)
-}
 
 // Builder Create an AdapterService for the specified chain
 type Builder func(config AdapterConfig) (AdapterService, error)
@@ -50,7 +31,7 @@ type defaultPorts struct {
 	builders map[string]Builder
 }
 
-//var once sync.Once
+var once sync.Once
 var ports Ports
 
 // GetAdapters Get all Adapters for the specified chain
@@ -65,6 +46,10 @@ func RegisterAdapter(config *AdapterConfig) error {
 
 // GetPortsIncetance Get Ports singlton instance
 func GetPortsIncetance() Ports {
+	once.Do(func() {
+		ports = &defaultPorts{}
+		ports.Init()
+	})
 	return ports
 }
 

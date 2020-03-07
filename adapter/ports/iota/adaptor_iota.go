@@ -11,15 +11,15 @@ import (
 	"strings"
 )
 
-//func init() {
-//	builder := func(config ports.AdapterConfig) (ports.AdapterService, error) {
-//		a := &IOTAAdaptor{config: &config}
-//		a.Start()
-//		a.Sync()
-//		return a, nil
-//	}
-//	ports.GetPortsIncetance().RegisterBuilder("iota", builder)
-//}
+func init() {
+	builder := func(config ports.AdapterConfig) (ports.AdapterService, error) {
+		a := &IOTAAdaptor{config: &config}
+		a.Start()
+		a.Sync()
+		return a, nil
+	}
+	ports.GetPortsIncetance().RegisterBuilder("iota", builder)
+}
 
 type IOTAAdaptor struct {
 	config      *ports.AdapterConfig
