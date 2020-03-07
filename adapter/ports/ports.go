@@ -15,6 +15,10 @@ import (
 )
 
 func init() {
+	once.Do(func() {
+		ports = &defaultPorts{}
+		ports.Init()
+	})
 	builderIOTA := func(config AdapterConfig) (AdapterService, error) {
 		a := &iota.IOTAAdaptor{ &config}
 		a.Start()
@@ -65,10 +69,6 @@ func RegisterAdapter(config *AdapterConfig) error {
 
 // GetPortsIncetance Get Ports singlton instance
 func GetPortsIncetance() Ports {
-	once.Do(func() {
-		ports = &defaultPorts{}
-		ports.Init()
-	})
 	return ports
 }
 
