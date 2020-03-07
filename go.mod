@@ -6,8 +6,8 @@ require (
 	github.com/QOSGroup/cassini v0.1.1
 	github.com/QOSGroup/qbase v0.2.5
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
-	github.com/coreos/etcd v3.3.18+incompatible
-	github.com/etcd-io/etcd v3.3.18+incompatible
+	github.com/coreos/etcd v3.3.10+incompatible
+	github.com/etcd-io/etcd v3.3.10+incompatible
 	github.com/hyperledger/fabric-sdk-go v1.0.0-beta1
 	github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric v0.0.0-20190822125948-d2b42602e52e
 	github.com/iotaledger/iota.go v1.0.0-beta.14
