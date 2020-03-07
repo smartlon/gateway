@@ -32,7 +32,7 @@ etcd:
 qscs:
   - name: supply-fabric
     type: fabric
-    nodes: 202.117.43.212:10051
+    nodes: localhost:10051
   - name: supply-iota
     type: iota
     nodes: 202.117.43.212:14265
