@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/hyperledger/fabric-sdk-go v1.0.0-alpha5.0.20190411180201-5a9a0e749e4f
 	github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric v0.0.0-20190411180201-5a9a0e749e4f
-	github.com/iotaledger/iota.go v1.0.0-beta.14
+	github.com/iotaledger/iota.go v1.0.0-beta.10
 	github.com/nats-io/nats-server/v2 v2.1.4 // indirect
 	github.com/nats-io/nats.go v1.9.1
 	github.com/pebbe/zmq4 v1.0.0
