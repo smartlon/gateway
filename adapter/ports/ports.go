@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	_"github.com/smartlon/gateway/adapter/ports/fabric"
-	_"github.com/smartlon/gateway/adapter/ports/iota"
 	"github.com/smartlon/gateway/config"
 	"github.com/smartlon/gateway/log"
 	"github.com/smartlon/gateway/route"

@@ -1,10 +1,9 @@
-package iota
+package ports
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/pebbe/zmq4"
-	"github.com/smartlon/gateway/adapter/ports"
 	"github.com/smartlon/gateway/adapter/ports/iota/sdk"
 	"github.com/smartlon/gateway/log"
 	"github.com/smartlon/gateway/types"
@@ -12,17 +11,17 @@ import (
 )
 
 func init() {
-	builder := func(config ports.AdapterConfig) (ports.AdapterService, error) {
+	builder := func(config AdapterConfig) (AdapterService, error) {
 		a := &IOTAAdaptor{config: &config}
 		a.Start()
 		a.Sync()
 		return a, nil
 	}
-	ports.GetPortsIncetance().RegisterBuilder("iota", builder)
+	GetPortsIncetance().RegisterBuilder("iota", builder)
 }
 
 type IOTAAdaptor struct {
-	config      *ports.AdapterConfig
+	config      *AdapterConfig
 }
 
 
@@ -41,12 +40,12 @@ func (a *IOTAAdaptor) Stop() error {
 }
 
 // Subscribe events from fabric chain
-func (a *IOTAAdaptor) Subscribe(listener ports.EventsListener) {
-	log.Infof("event subscribe: %s", ports.GetAdapterKey(a))
+func (a *IOTAAdaptor) Subscribe(listener EventsListener) {
+	log.Infof("event subscribe: %s", GetAdapterKey(a))
 	dealt := a.GetPort() - 14625
 	zmqPort := dealt * 1000 + 5556
-	endpoint := ports.GetAdapterKey(a)
-	zmqAddress := ports.GenEndpoint("tcp",a.GetIP(),zmqPort)
+	endpoint := GetAdapterKey(a)
+	zmqAddress := GenEndpoint("tcp",a.GetIP(),zmqPort)
 	go func() {
 		socket, err := zmq4.NewSocket(zmq4.SUB)
 		must(err)
@@ -102,7 +101,7 @@ func (a *IOTAAdaptor) SubmitTx(tx string) (string,error) {
 	if err != nil {
 		return "",err
 	}
-	transmitTxInfo.Endpoint = ports.GenEndpoint("http",a.GetIP(),a.GetPort())
+	transmitTxInfo.Endpoint = GenEndpoint("http",a.GetIP(),a.GetPort())
 	mamstate,root,address := sdk.MAMTransmit(transmitTxInfo.Message,transmitTxInfo.Mamstate,transmitTxInfo.Seed,transmitTxInfo.Mode,transmitTxInfo.SideKey,transmitTxInfo.TransactionTag,transmitTxInfo.Endpoint)
 	transmitResult := sdk.TransmitResult{
 		root,
@@ -127,7 +126,7 @@ func (a *IOTAAdaptor) ObtainTx(tx string) (string, error) {
 	if err != nil {
 		return "",err
 	}
-	recieveTxInfo.Endpoint = ports.GenEndpoint("http",a.GetIP(),a.GetPort())
+	recieveTxInfo.Endpoint = GenEndpoint("http",a.GetIP(),a.GetPort())
 	iotdatas := sdk.MAMReceive(recieveTxInfo.Root,recieveTxInfo.Mode,recieveTxInfo.SideKey,recieveTxInfo.Endpoint)
 	var temperature string
 	for _,iotdata := range iotdatas {
@@ -147,8 +146,8 @@ func (a *IOTAAdaptor) ObtainTx(tx string) (string, error) {
 
 // Count Calculate the total and consensus number for chain
 func (a *IOTAAdaptor) Count() (totalNumber int, consensusNumber int) {
-	totalNumber = ports.GetPortsIncetance().Count(a.GetChainName())
-	consensusNumber = ports.Consensus2of3(totalNumber)
+	totalNumber = GetPortsIncetance().Count(a.GetChainName())
+	consensusNumber = Consensus2of3(totalNumber)
 	return
 }
 

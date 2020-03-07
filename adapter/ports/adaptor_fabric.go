@@ -1,22 +1,21 @@
-package fabric
+package ports
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/smartlon/gateway/adapter/ports/fabric/sdk"
-	"github.com/smartlon/gateway/adapter/ports"
 	"github.com/smartlon/gateway/log"
 )
 
 func init() {
-	builder := func(config ports.AdapterConfig) (ports.AdapterService, error) {
+	builder := func(config AdapterConfig) (AdapterService, error) {
 		a := &FabAdaptor{config: &config}
 		a.Start()
 		a.Sync()
 		//a.Subscribe(config.Listener)
 		return a, nil
 	}
-	ports.GetPortsIncetance().RegisterBuilder("fabric", builder)
+	GetPortsIncetance().RegisterBuilder("fabric", builder)
 }
 
 const (
@@ -38,7 +37,7 @@ type ChainResult struct {
 
 // FabAdaptor provides adapter for hyperledger fabric
 type FabAdaptor struct {
-	config      *ports.AdapterConfig
+	config      *AdapterConfig
 }
 
 // Start fabric adapter service
@@ -58,8 +57,8 @@ func (a *FabAdaptor) Stop() error {
 }
 
 // Subscribe events from fabric chain
-func (a *FabAdaptor) Subscribe(listener ports.EventsListener) {
-	log.Infof("event subscribe: %s", ports.GetAdapterKey(a))
+func (a *FabAdaptor) Subscribe(listener EventsListener) {
+	log.Infof("event subscribe: %s", GetAdapterKey(a))
 	peerUrl := fmt.Sprintf("%s:%d",a.GetIP(),a.GetPort())
 	go sdk.Listener(ChaincodeID,peerUrl,listener,a)
 }
@@ -81,8 +80,8 @@ func (a *FabAdaptor) ObtainTx(tx string) (string, error) {
 
 // Count Calculate the total and consensus number for chain
 func (a *FabAdaptor) Count() (totalNumber int, consensusNumber int) {
-	totalNumber = ports.GetPortsIncetance().Count(a.GetChainName())
-	consensusNumber = ports.Consensus2of3(totalNumber)
+	totalNumber = GetPortsIncetance().Count(a.GetChainName())
+	consensusNumber = Consensus2of3(totalNumber)
 	return
 }
 
