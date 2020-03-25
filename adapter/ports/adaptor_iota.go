@@ -85,6 +85,7 @@ func (a *IOTAAdaptor) Subscribe(listener EventsListener) {
 				listener(event,a)
 			}
 		}
+		fmt.Printf("stop tx feed\n")
 	}()
 }
 func must(err error) {
