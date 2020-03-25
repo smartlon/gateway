@@ -45,7 +45,7 @@ func qcpConsume(from, to string, e chan<- error) {
 		}
 		log.Infof("[#%d] Consume subject [%s] nodeAddress '%s' event '%s'",
 			i, consumer.Subject(), tx.NodeAddress,string(data))
-		ferry(from,to,tx)
+		go ferry(from,to,tx)
 	}
 	subject := from + "2" + to
 	consumer, err := queue.NewConsumer(subject)

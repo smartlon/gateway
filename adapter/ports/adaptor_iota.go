@@ -52,13 +52,15 @@ func (a *IOTAAdaptor) Subscribe(listener EventsListener) {
 		socket.SetSubscribe("tx")
 		err = socket.Connect(zmqAddress)
 		must(err)
-
+		index :=0
 		fmt.Printf("started tx feed\n")
 		for {
+			index++
+			log.Infof("%d \n", index)
 			msg, err := socket.Recv(0)
 			must(err)
-
 			tx := sdk.BuildTxFromZMQData(msg)
+
 			//fmt.Printf("received tx: %s\n",tx)
 			if tx == nil {
 				fmt.Printf("tx: receive error! message format error\n")
@@ -82,7 +84,6 @@ func (a *IOTAAdaptor) Subscribe(listener EventsListener) {
 				}
 				listener(event,a)
 			}
-
 		}
 	}()
 }
