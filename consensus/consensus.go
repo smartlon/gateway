@@ -37,10 +37,9 @@ func StartQcpConsume(conf *config.Config) (err error) {
 
 func qcpConsume(from, to string, e chan<- error) {
 	var i int64
-	adsArrayFrom :=make([]ports.Adapter,0)
-	adsArrayTo :=make([]ports.Adapter,0)
-	getAdapters(from,adsArrayFrom)
-	getAdapters(from,adsArrayTo)
+
+	adsArrayFrom :=getAdapters(from)
+	adsArrayTo :=getAdapters(to)
 	listener := func(data []byte, consumer queue.Consumer) {
 		i++
 		tx := types.Event{}
@@ -50,7 +49,7 @@ func qcpConsume(from, to string, e chan<- error) {
 		}
 		log.Infof("[#%d] Consume subject [%s] nodeAddress '%s' event '%s'",
 			i, consumer.Subject(), tx.NodeAddress,string(data))
-		go ferry(adsArrayFrom[0],adsArrayTo[rand.Intn(len(adsArrayTo))],tx)
+		go ferry(adsArrayFrom[rand.Intn(len(adsArrayFrom))],adsArrayTo[rand.Intn(len(adsArrayTo))],tx)
 	}
 	subject := from + "2" + to
 	consumer, err := queue.NewConsumer(subject)
@@ -190,14 +189,16 @@ func ferry(fromAd,toAd ports.Adapter, tx types.Event) {
 	}
 }
 
-func getAdapters(chainName string,adsArray []ports.Adapter){
+func getAdapters(chainName string) (adsArray []ports.Adapter){
 	ads,err :=ports.GetAdapters(chainName)
 	if err != nil {
 		log.Error(err)
 	}
+	adsArray = make([]ports.Adapter,0)
 	for _, v := range ads {
 		adsArray = append(adsArray,v)
 	}
+	return
 }
 
 //func getAdapter(chainName string) ports.Adapter {
