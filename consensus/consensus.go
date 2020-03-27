@@ -11,6 +11,7 @@ import (
 	"github.com/smartlon/gateway/types"
 	iotaSDK "github.com/smartlon/gateway/adapter/ports/iota/sdk"
 	fabricSDK "github.com/smartlon/gateway/adapter/ports/fabric/sdk"
+	"math/rand"
 	"strconv"
 	"time"
 )
@@ -36,6 +37,10 @@ func StartQcpConsume(conf *config.Config) (err error) {
 
 func qcpConsume(from, to string, e chan<- error) {
 	var i int64
+	adsArrayFrom :=make([]ports.Adapter,0)
+	adsArrayTo :=make([]ports.Adapter,0)
+	getAdapters(from,adsArrayFrom)
+	getAdapters(from,adsArrayTo)
 	listener := func(data []byte, consumer queue.Consumer) {
 		i++
 		tx := types.Event{}
@@ -45,7 +50,7 @@ func qcpConsume(from, to string, e chan<- error) {
 		}
 		log.Infof("[#%d] Consume subject [%s] nodeAddress '%s' event '%s'",
 			i, consumer.Subject(), tx.NodeAddress,string(data))
-		go ferry(from,to,tx)
+		go ferry(adsArrayFrom[rand.Intn(len(adsArrayFrom))],adsArrayTo[rand.Intn(len(adsArrayTo))],tx)
 	}
 	subject := from + "2" + to
 	consumer, err := queue.NewConsumer(subject)
@@ -60,9 +65,9 @@ func qcpConsume(from, to string, e chan<- error) {
 	return
 }
 
-func ferry(from,to string, tx types.Event) {
-	fromAd := getAdapter(from)
-	toAd := getAdapter(to)
+func ferry(fromAd,toAd ports.Adapter, tx types.Event) {
+	//fromAd := getAdapter(from)
+	//toAd := getAdapter(to)
 	switch tx.Func {
 	case "FABRICCREATE":
 		timestamp := strconv.FormatInt(time.Now().UnixNano() / 1000000, 10)
@@ -185,13 +190,25 @@ func ferry(from,to string, tx types.Event) {
 	}
 }
 
-func getAdapter(chainName string) ports.Adapter {
+func getAdapters(chainName string,adsArray []ports.Adapter){
 	ads,err :=ports.GetAdapters(chainName)
 	if err != nil {
 		log.Error(err)
 	}
 	for _, v := range ads {
-		return v
+		adsArray = append(adsArray,v)
 	}
-	return nil
 }
+
+//func getAdapter(chainName string) ports.Adapter {
+//	ads,err :=ports.GetAdapters(chainName)
+//	if err != nil {
+//		log.Error(err)
+//	}
+//
+//	for _, v := range ads {
+//
+//		return v
+//	}
+//	return nil
+//}

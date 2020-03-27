@@ -35,5 +35,5 @@ qscs:
     nodes: localhost:10051
   - name: supply-iota
     type: iota
-    nodes: 202.117.43.212:14265
+    nodes: 202.117.43.212:14265,202.117.43.212:14266,202.117.43.212:14267
 
